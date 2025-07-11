@@ -1,3 +1,4 @@
+import 'package:converter_app/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -9,9 +10,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: (),
+      title: 'Flutter Demmo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)
+      ),
+        home: const WelcomeScreen(),
     );
+
   }
 }
+
 
