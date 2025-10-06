@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "422589866231",
+    "project_id": "file-converter-app-7e11d",
+    "storage_bucket": "file-converter-app-7e11d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422589866231:android:97c38fad00b473d60473f2",
+        "android_client_info": {
+          "package_name": "com.example.converter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD07-_sDin4tPMtHohWs6Zn3CJL9Szny9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
