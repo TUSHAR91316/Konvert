@@ -1,3 +1,4 @@
+import 'package:converter_app/services/auth_service.dart';
 import 'package:converter_app/screens/forgot_password.dart';
 import 'package:converter_app/screens/home_screen.dart';
 import 'package:converter_app/screens/signup_screen.dart';
@@ -236,11 +237,17 @@ class _SignInScreenState extends State<SignInScreen> {
                               onPressed: () {},
                               icon: const Icon(Icons.facebook, size: 40, color: Colors.blue)),
                           IconButton(
-                            onPressed: () {},
                             icon: const FaIcon(FontAwesomeIcons.google, size: 35),
+                            onPressed: () async {
+                              final user = await AuthService().signInWithGoogle();
+                              if (user != null && context.mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                );
+                              }
+                            },
                           ),
-                          IconButton(
-                              onPressed: () {},
                               icon: const Icon(Icons.apple, size: 40, color: Colors.black)),
                         ],
                       ),
