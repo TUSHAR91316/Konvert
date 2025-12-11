@@ -1,5 +1,5 @@
 name: converter_app
-description: "A new Flutter project."
+description: "Konvert - The ultimate file converter."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -33,7 +33,7 @@ dependencies:
   firebase_core: ^4.1.1
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.2
-  google_sign_in: ^7.2.0
+  google_sign_in: ^6.2.2
   flutter_facebook_auth: ^7.1.0
   sign_in_with_apple: ^7.0.1
 
@@ -53,6 +53,7 @@ dependencies:
   flutter_animate: ^4.5.2
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
+  open_file: ^3.3.2
 
 dev_dependencies:
   flutter_test:

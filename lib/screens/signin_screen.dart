@@ -53,6 +53,20 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          },
+          child: const Text(
+            "Skip Login",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
       child: Column(
         children: [
           const Expanded(
@@ -248,7 +262,17 @@ class _SignInScreenState extends State<SignInScreen> {
                               }
                             },
                           ),
-                              icon: const Icon(Icons.apple, size: 40, color: Colors.black)),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.black12),
+                            ),
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.apple, size: 25, color: Colors.black),
+                            ),
+                          ),
                         ],
                       ),
                     ],

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomScaffold extends StatelessWidget {
-  const CustomScaffold({super.key, this.child});
+  const CustomScaffold({super.key, this.child, this.actions});
   final Widget? child;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +12,7 @@ class CustomScaffold extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: actions,
       ),
       extendBodyBehindAppBar: true,
       body: Stack(

@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Antigravity'),
+        title: const Text('Konvert'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
