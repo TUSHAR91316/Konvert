@@ -134,7 +134,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
       appBar: AppBar(title: const Text("Convert File")),
       body: SafeArea(
         child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
         child: Column(
           children: [
             // File Picker Area
@@ -274,12 +274,13 @@ class _ConvertScreenState extends State<ConvertScreen> {
                 ],
               )
             else
-              SizedBox(
+              Container(
                 width: double.infinity,
-                height: 55,
+                padding: const EdgeInsets.symmetric(vertical: 0),
                 child: ElevatedButton(
                   onPressed: (_selectedFiles.isEmpty) ? null : _processConversion,
                   style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     backgroundColor: Colors.blueAccent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     elevation: 5,

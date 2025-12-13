@@ -54,18 +54,28 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () async {
-                await AuthService().signOut();
-                if (context.mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => const SignInScreen()),
-                      (Route<dynamic> route) => false);
-                }
-              },
-            ),
+            if (user == null)
+              ListTile(
+                leading: const Icon(Icons.login),
+                title: const Text('Sign In'),
+                onTap: () {
+                   Navigator.pop(context);
+                   Navigator.push(context, MaterialPageRoute(builder: (_) => const SignInScreen()));
+                },
+              )
+            else
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Logout'),
+                onTap: () async {
+                  await AuthService().signOut();
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => const SignInScreen()),
+                        (Route<dynamic> route) => false);
+                  }
+                },
+              ),
           ],
         ),
       ),
@@ -89,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.75,
                 children: [
                    _buildGridCard(context, "Images to PDF", "JPG, PNG, WEBP, HEIC", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png', 'webp', 'heic'], 100),
                    _buildGridCard(context, "Word to PDF", "DOC, DOCX", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
@@ -113,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.75,
                 children: [
                    _buildCompressionCard(context, "Compress Image", "Reduce size (JPG, PNG)", Icons.compress, Colors.pink, 100),
                    // Placeholder for Docs
@@ -135,7 +145,7 @@ class HomeScreen extends StatelessWidget {
         Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format, allowedExtensions: extensions)));
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
@@ -145,21 +155,21 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 32),
+              child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const SizedBox(height: 4),
             Text(
               subtitle, 
               style: TextStyle(fontSize: 10, color: Colors.grey[700]), 
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -176,7 +186,7 @@ class HomeScreen extends StatelessWidget {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
@@ -186,21 +196,21 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 32),
+              child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const SizedBox(height: 4),
             Text(
               subtitle, 
               style: TextStyle(fontSize: 10, color: Colors.grey[700]), 
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
           ],
