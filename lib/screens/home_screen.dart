@@ -1,3 +1,4 @@
+import 'package:converter_app/screens/compress_image_screen.dart';
 import 'package:converter_app/screens/convert_screen.dart';
 import 'package:converter_app/screens/history_screen.dart';
 import 'package:converter_app/screens/settings_screen.dart';
@@ -68,18 +69,23 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Padding(
+      body: Container(
+        height: double.infinity,
         padding: const EdgeInsets.all(15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
              const Text(
               "Convert File",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ).animate().fadeIn().slideX(),
             const SizedBox(height: 20),
-            Expanded(
-              child: GridView.count(
+            
+            // CONVERSION GRID
+            GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
@@ -90,9 +96,32 @@ class HomeScreen extends StatelessWidget {
                   _buildGridCard(context, "PPT to PDF", "PPT, PPTX", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
                   _buildGridCard(context, "Docs to PDF", "TXT, RTF, HTML", Icons.article, Colors.teal, 'pdf', ['txt', 'rtf', 'html', 'odt'], 500),
                 ],
-              ),
             ),
-          ],
+            const SizedBox(height: 30),
+
+            const Text(
+              "Compression Tools",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ).animate().fadeIn().slideX(delay: const Duration(milliseconds: 200)),
+            
+            const SizedBox(height: 20),
+            
+            GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                children: [
+                   _buildCompressionCard(context, "Compress Image", "Reduce size (JPG, PNG)", Icons.compress, Colors.pink, 100),
+                   // Placeholder for Docs
+                   _buildCompressionCard(context, "Shrink Docs", "Coming Soon (PDF)", Icons.picture_as_pdf, Colors.blueGrey, 200, onTap: () {
+                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Document Compression coming next!")));
+                   }),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -102,6 +131,47 @@ class HomeScreen extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format, allowedExtensions: extensions)));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 32),
+            ),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const SizedBox(height: 5),
+            Text(
+              subtitle, 
+              style: TextStyle(fontSize: 10, color: Colors.grey[700]), 
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    ).animate(delay: Duration(milliseconds: delay)).fadeIn().scale();
+  }
+
+  Widget _buildCompressionCard(BuildContext context, String title, String subtitle, IconData icon, Color color, int delay, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap ?? () {
+        if (title == "Compress Image") {
+           Navigator.push(context, MaterialPageRoute(builder: (_) => const CompressImageScreen()));
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(10),
