@@ -251,7 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       const SizedBox(height: 25.0),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
@@ -260,30 +260,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               border: Border.all(color: Colors.black12),
                             ),
                             child: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Bootstrap.google, size: 25),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.black12),
-                            ),
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Bootstrap.facebook, size: 25),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.black12),
-                            ),
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Bootstrap.apple, size: 25),
+                              onPressed: () async {
+                                final user = await _auth.signInWithGoogle();
+                                if (user != null && context.mounted) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const SignInScreen()), // Or Home, but SignUp usually redirects to SignIn or Home. Logic says SignInScreen.
+                                  );
+                                }
+                              },
+                              icon: Icon(Bootstrap.google, size: 25, color: Colors.blue),
                             ),
                           ),
                         ],

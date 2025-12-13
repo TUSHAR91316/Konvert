@@ -34,8 +34,6 @@ dependencies:
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.2
   google_sign_in: ^6.2.2
-  flutter_facebook_auth: ^7.1.0
-  sign_in_with_apple: ^7.0.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -43,8 +41,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   icons_plus: ^5.0.0
   font_awesome_flutter: ^10.7.0
-  docx_template: ^0.4.0
-  html_to_pdf: ^0.8.1
   dio: ^5.9.0
   flutter_secure_storage: ^9.2.4
   file_picker: ^10.3.7

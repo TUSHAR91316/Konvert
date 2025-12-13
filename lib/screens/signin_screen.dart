@@ -249,13 +249,10 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       const SizedBox(height: 25.0),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.facebook, size: 40, color: Colors.blue)),
-                          IconButton(
-                            icon: const FaIcon(FontAwesomeIcons.google, size: 35),
+                            icon: const FaIcon(FontAwesomeIcons.google, size: 35, color: Colors.blue),
                             onPressed: () async {
                               final user = await AuthService().signInWithGoogle();
                               if (user != null && context.mounted) {
@@ -265,17 +262,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                 );
                               }
                             },
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.black12),
-                            ),
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.apple, size: 25, color: Colors.black),
-                            ),
                           ),
                         ],
                       ),
