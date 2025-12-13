@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ConvertScreen extends StatefulWidget {
-  const ConvertScreen({super.key});
+  final String initialFormat;
+  const ConvertScreen({super.key, this.initialFormat = 'pdf'});
 
   @override
   State<ConvertScreen> createState() => _ConvertScreenState();
@@ -17,8 +18,14 @@ class _ConvertScreenState extends State<ConvertScreen> {
   List<File> _selectedFiles = [];
   bool _isConverting = false;
   String? _statusMessage;
-  String _targetFormat = 'pdf'; // Default format
+  late String _targetFormat; 
   String? _outputDirectory;
+  
+  @override
+  void initState() {
+    super.initState();
+    _targetFormat = widget.initialFormat;
+  }
   
   // Services
   final _conversionService = ConversionService();

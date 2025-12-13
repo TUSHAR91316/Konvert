@@ -1,69 +1,95 @@
 import 'package:converter_app/screens/convert_screen.dart';
 import 'package:converter_app/screens/history_screen.dart';
 import 'package:converter_app/screens/settings_screen.dart';
+import 'package:converter_app/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:converter_app/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Konvert'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-               Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthService().signOut();
-              if (context.mounted) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            },
-          )
-        ],
+        title: const Text('Konvert Dashboard'),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            const Text(
-              "What would you like to do?",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ).animate().fadeIn().slideY(),
-            const SizedBox(height: 30),
-            
-            _buildActionCard(
-              context,
-              title: "Convert File",
-              subtitle: "Images, PDF, Word, Excel...",
-              icon: Icons.transform,
-              color: Colors.blueAccent,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ConvertScreen())),
-              delay: 200,
+            UserAccountsDrawerHeader(
+              accountName: Text(user?.displayName ?? "Guest User"),
+              accountEmail: Text(user?.email ?? "Sign in to sync history"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  (user?.displayName ?? "G")[0].toUpperCase(),
+                  style: const TextStyle(fontSize: 40.0),
+                ),
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.blueAccent,
+              ),
             ),
-            
-            const SizedBox(height: 20),
-            
-            _buildActionCard(
-              context,
-              title: "History",
-              subtitle: "View past conversions",
-              icon: Icons.history,
-              color: Colors.orangeAccent,
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('History'),
               onTap: () {
+                Navigator.pop(context); // Close drawer
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
               },
-              delay: 400,
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () async {
+                await AuthService().signOut();
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const SignInScreen()),
+                      (Route<dynamic> route) => false);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             const Text(
+              "Quick Actions",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ).animate().fadeIn().slideX(),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                children: [
+                  _buildGridCard(context, "Images to PDF", Icons.image, Colors.purple, 'pdf', 100),
+                  _buildGridCard(context, "Word to PDF", Icons.description, Colors.blue, 'pdf', 200),
+                  _buildGridCard(context, "Excel to PDF", Icons.table_chart, Colors.green, 'pdf', 300),
+                  _buildGridCard(context, "PPT to PDF", Icons.slideshow, Colors.orange, 'pdf', 400),
+                ],
+              ),
             ),
           ],
         ),
@@ -71,24 +97,19 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-    required int delay,
-  }) {
+  Widget _buildGridCard(BuildContext context, String title, IconData icon, Color color, String format, int delay) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format)));
+      },
       child: Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(15),
@@ -96,21 +117,13 @@ class HomeScreen extends StatelessWidget {
                 color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 30),
+              child: Icon(icon, color: color, size: 40),
             ),
-            const SizedBox(width: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text(subtitle, style: const TextStyle(color: Colors.grey)),
-              ],
-            ),
-            const Spacer(),
-            Icon(Icons.arrow_forward_ios, color: color, size: 20),
+            const SizedBox(height: 15),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
-    ).animate(delay: Duration(milliseconds: delay)).fadeIn().slideX();
+    ).animate(delay: Duration(milliseconds: delay)).fadeIn().scale();
   }
 }
