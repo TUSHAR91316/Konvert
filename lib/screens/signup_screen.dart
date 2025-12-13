@@ -325,7 +325,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
-  _signup() async{
+  Future<void> _signup() async{
     await _auth.createUserWithEmailAndPassword(_emailController.text, _passwordController.text);
   }
 }

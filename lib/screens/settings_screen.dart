@@ -29,7 +29,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _saveKey() async {
     await _vtService.setApiKey(_apiKeyController.text);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("API Key Saved!")));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("API Key Saved!")));
+    }
   }
 
   @override

@@ -28,17 +28,21 @@ class _SignInScreenState extends State<SignInScreen> {
           password: _passwordController.text,
         );
         if (credential.user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
         }
       } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Sign-in failed: ${e.message}"),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Sign-in failed: ${e.message}"),
+            ),
+          );
+        }
       }
     }
   }

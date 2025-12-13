@@ -4,8 +4,6 @@ import 'package:converter_app/services/virus_total_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 
 class ConvertScreen extends StatefulWidget {
   const ConvertScreen({super.key});
@@ -21,7 +19,6 @@ class _ConvertScreenState extends State<ConvertScreen> {
   
   // Services
   final _conversionService = ConversionService();
-  final _vtService = VirusTotalService();
 
   Future<void> _pickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
