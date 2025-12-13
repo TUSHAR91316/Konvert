@@ -21,8 +21,32 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   File? _resultFile;
   bool _isCompressing = false;
   String? _statusMessage;
+  String? _outputDirectory;
 
   // Mode: 0 = Percentage, 1 = Target Size
+  int _mode = 0;
+
+  Future<void> _pickDirectory() async {
+    String? dir = await FilePicker.platform.getDirectoryPath();
+    if (dir != null) {
+      setState(() => _outputDirectory = dir);
+    }
+  }
+
+  // ... (inside _processCompression) ...
+      if (compressed == null) throw Exception("Compression failed");
+
+      // Save to Output Directory if Selected
+      if (_outputDirectory != null) {
+         final fileName = "compressed_${p.basename(_selectedFile!.path)}";
+         final newPath = p.join(_outputDirectory!, fileName);
+         _resultFile = await compressed.copy(newPath);
+      } else {
+         _resultFile = compressed;
+      }
+      
+      // Calculate savings ... 
+
   int _mode = 0;
 
   // Percentage Mode
@@ -80,11 +104,14 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
 
       if (compressed == null) throw Exception("Compression failed");
 
-      // Move to Documents to save permanently (like conversions)
-      // Or just keep in temp for MVP? Let's save to Documents so History works nicely if we add it.
-      // For now, let's just use the temp file but make sure we can open it.
-      
-      _resultFile = compressed;
+      // Save to Output Directory if Selected
+      if (_outputDirectory != null) {
+         final fileName = "compressed_${p.basename(_selectedFile!.path)}";
+         final newPath = p.join(_outputDirectory!, fileName);
+         _resultFile = await compressed.copy(newPath);
+      } else {
+         _resultFile = compressed;
+      }
       
       // Calculate savings
       int originalSize = await _selectedFile!.length();
@@ -92,6 +119,12 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
       double saved = (originalSize - newSize) / originalSize * 100;
       
       String sizeStr = _formatSize(newSize);
+      String loc = _outputDirectory != null ? "\nSaved to: ${p.basename(_resultFile!.path)}" : "\nSaved to Temp";
+
+      setState(() {
+        _statusMessage = "Success! Size: $sizeStr$loc\n(Reduced by ${saved.toStringAsFixed(1)}%)";
+        _isCompressing = false;
+      });
 
       setState(() {
         _statusMessage = "Success! Saved $sizeStr\n(Reduced by ${saved.toStringAsFixed(1)}%)";
@@ -221,7 +254,20 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                    ),
                 ],
                 
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
+
+                // Output Directory Selector
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text("Save Location (Optional)", style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(_outputDirectory ?? "Default: Temporary Folder"),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.folder_open, color: Colors.blue),
+                    onPressed: _pickDirectory,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
                 
                if (_isCompressing)
                   Column(
