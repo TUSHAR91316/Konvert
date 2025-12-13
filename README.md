@@ -33,16 +33,18 @@ Konvert is a hybrid, secure, and powerful mobile application designed to handle 
 
 ## 🆚 Konvert vs. Web Converters
 
-Why download Konvert instead of using a website?
+Why download Konvert? It offers a **Hybrid** advantage:
 
 | Feature | 🚀 Konvert App | 🌐 Typical Web Converter |
 | :--- | :--- | :--- |
-| **Privacy** | **High**: Local conversion for images. No upload needed. | **Low**: Must upload *every* file to their server. |
-| **Security** | **VirusTotal Auto-Scan** checks files for you. | No virus scanning; you might download malware. |
-| **Offline Use** | **Yes**: Convert/Compress images without internet. | **No**: Requires active internet for everything. |
-| **Speed** | **Instant**: No upload time for local files. | **Slow**: Time spent uploading & downloading. |
-| **History** | **Local Log**: Keeps your history private on-device. | **None / Public**: Often requires account or loses data. |
-| **Ads** | **Ad-Free** experience. | **Cluttered**: Often full of pop-ups and ads. |
+| **Images** (Privacy) | **100% Offline**: Processed on your phone. No upload. | **Online**: Must upload photos to server. |
+| **Documents** (Docs/PPT) | **Secure Cloud**: Uploaded, processed, then **instantly deleted**. | **Unknown**: Files often stored for hours/days. |
+| **Security** | **VirusTotal Auto-Scan** checks files before upload. | No virus scanning. |
+| **Speed** | **Instant** for local tools (Images). | **Slow**: Dependent on upload speed. |
+| **History** | **Local Log**: Keeps your history private on-device. | **None**: Data lost after closing tab. |
+| **Ads** | **Ad-Free** experience. | **Cluttered**: Full of ads/popups. |
+
+> **Note**: Document conversion (DOCX, PPTX) requires an internet connection to reach our secure helper backend. Image tools work completely offline.
 
 ---
 
