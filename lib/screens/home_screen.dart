@@ -89,12 +89,13 @@ class HomeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
+                childAspectRatio: 0.85,
                 children: [
-                  _buildGridCard(context, "Images to PDF", "JPG, PNG, WEBP, HEIC", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png', 'webp', 'heic'], 100),
-                  _buildGridCard(context, "Word to PDF", "DOC, DOCX", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
-                  _buildGridCard(context, "Excel to PDF", "XLS, XLSX", Icons.table_chart, Colors.green, 'pdf', ['xls', 'xlsx'], 300),
-                  _buildGridCard(context, "PPT to PDF", "PPT, PPTX", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
-                  _buildGridCard(context, "Docs to PDF", "TXT, RTF, HTML", Icons.article, Colors.teal, 'pdf', ['txt', 'rtf', 'html', 'odt'], 500),
+                   _buildGridCard(context, "Images to PDF", "JPG, PNG, WEBP, HEIC", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png', 'webp', 'heic'], 100),
+                   _buildGridCard(context, "Word to PDF", "DOC, DOCX", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
+                   _buildGridCard(context, "Excel to PDF", "XLS, XLSX", Icons.table_chart, Colors.green, 'pdf', ['xls', 'xlsx'], 300),
+                   _buildGridCard(context, "PPT to PDF", "PPT, PPTX", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
+                   _buildGridCard(context, "Docs to PDF", "TXT, RTF, HTML", Icons.article, Colors.teal, 'pdf', ['txt', 'rtf', 'html', 'odt'], 500),
                 ],
             ),
             const SizedBox(height: 30),
@@ -112,6 +113,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
+                childAspectRatio: 0.85,
                 children: [
                    _buildCompressionCard(context, "Compress Image", "Reduce size (JPG, PNG)", Icons.compress, Colors.pink, 100),
                    // Placeholder for Docs
