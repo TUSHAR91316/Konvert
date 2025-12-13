@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:converter_app/services/compression_service.dart';
-import 'package:converter_app/services/history_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -26,29 +25,6 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   // Mode: 0 = Percentage, 1 = Target Size
   int _mode = 0;
 
-  Future<void> _pickDirectory() async {
-    String? dir = await FilePicker.platform.getDirectoryPath();
-    if (dir != null) {
-      setState(() => _outputDirectory = dir);
-    }
-  }
-
-  // ... (inside _processCompression) ...
-      if (compressed == null) throw Exception("Compression failed");
-
-      // Save to Output Directory if Selected
-      if (_outputDirectory != null) {
-         final fileName = "compressed_${p.basename(_selectedFile!.path)}";
-         final newPath = p.join(_outputDirectory!, fileName);
-         _resultFile = await compressed.copy(newPath);
-      } else {
-         _resultFile = compressed;
-      }
-      
-      // Calculate savings ... 
-
-  int _mode = 0;
-
   // Percentage Mode
   double _quality = 80;
 
@@ -60,6 +36,13 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   void dispose() {
     _sizeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickDirectory() async {
+    String? dir = await FilePicker.platform.getDirectoryPath();
+    if (dir != null) {
+      setState(() => _outputDirectory = dir);
+    }
   }
 
   Future<void> _pickFile() async {
@@ -126,11 +109,6 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
         _isCompressing = false;
       });
 
-      setState(() {
-        _statusMessage = "Success! Saved $sizeStr\n(Reduced by ${saved.toStringAsFixed(1)}%)";
-        _isCompressing = false;
-      });
-
     } catch (e) {
       setState(() {
         _statusMessage = "Error: ${e.toString()}";
@@ -149,9 +127,10 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Compress Image")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 50),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Picker
@@ -272,7 +251,7 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                if (_isCompressing)
                   Column(
                     children: [
-                       const LinearProgressIndicator(),
+                       const LinearProgressIndicator(minHeight: 8, borderRadius: BorderRadius.all(Radius.circular(10))),
                        const SizedBox(height: 10),
                        Text(_statusMessage ?? "Processing..."),
                     ],
@@ -305,7 +284,6 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                            label: const Text("Open"),
                            onPressed: () => OpenFile.open(_resultFile!.path),
                          ),
-                         // Add History logic later if needed
                        ],
                      )
                    ],
@@ -313,6 +291,8 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                ).animate().fadeIn().slideY(),
           ],
         ),
+        ),
+      ),
       ),
     );
   }
