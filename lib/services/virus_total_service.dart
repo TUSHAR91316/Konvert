@@ -15,6 +15,15 @@ class VirusTotalService {
     await _storage.write(key: 'vt_api_key', value: key);
   }
 
+  Future<bool> getAutoScanEnabled() async {
+    String? val = await _storage.read(key: 'auto_scan_enabled');
+    return val == 'true';
+  }
+
+  Future<void> setAutoScanEnabled(bool enabled) async {
+    await _storage.write(key: 'auto_scan_enabled', value: enabled.toString());
+  }
+
   // Upload file to VirusTotal
   // Returns analysis ID
   Future<String?> scanFile(File file) async {

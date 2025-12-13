@@ -84,10 +84,10 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
                 children: [
-                  _buildGridCard(context, "Images to PDF", Icons.image, Colors.purple, 'pdf', 100),
-                  _buildGridCard(context, "Word to PDF", Icons.description, Colors.blue, 'pdf', 200),
-                  _buildGridCard(context, "Excel to PDF", Icons.table_chart, Colors.green, 'pdf', 300),
-                  _buildGridCard(context, "PPT to PDF", Icons.slideshow, Colors.orange, 'pdf', 400),
+                  _buildGridCard(context, "Images to PDF", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png'], 100),
+                  _buildGridCard(context, "Word to PDF", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
+                  _buildGridCard(context, "Excel to PDF", Icons.table_chart, Colors.green, 'pdf', ['xls', 'xlsx'], 300),
+                  _buildGridCard(context, "PPT to PDF", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
                 ],
               ),
             ),
@@ -97,10 +97,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGridCard(BuildContext context, String title, IconData icon, Color color, String format, int delay) {
+  Widget _buildGridCard(BuildContext context, String title, IconData icon, Color color, String format, List<String> extensions, int delay) {
     return InkWell(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format)));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format, allowedExtensions: extensions)));
       },
       child: Container(
         decoration: BoxDecoration(

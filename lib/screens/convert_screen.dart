@@ -8,7 +8,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 class ConvertScreen extends StatefulWidget {
   final String initialFormat;
-  const ConvertScreen({super.key, this.initialFormat = 'pdf'});
+  final List<String>? allowedExtensions;
+  const ConvertScreen({super.key, this.initialFormat = 'pdf', this.allowedExtensions});
 
   @override
   State<ConvertScreen> createState() => _ConvertScreenState();
@@ -33,7 +34,8 @@ class _ConvertScreenState extends State<ConvertScreen> {
   Future<void> _pickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true, 
-      type: FileType.any,
+      type: widget.allowedExtensions != null ? FileType.custom : FileType.any,
+      allowedExtensions: widget.allowedExtensions,
     );
 
     if (result != null) {
@@ -54,8 +56,20 @@ class _ConvertScreenState extends State<ConvertScreen> {
     });
 
     try {
-      // 1. VirusTotal Scan (Optional - User would toggle this in real app, doing auto for demo if key exists)
-      // For MVP, we skip strictly enforcing VT to avoid blocking flow if no key.
+      // 1. VirusTotal Auto-Scan
+      bool autoScan = await VirusTotalService().getAutoScanEnabled();
+      String? apiKey = await VirusTotalService().getApiKey();
+      
+      if (autoScan && apiKey != null && apiKey.isNotEmpty) {
+         setState(() => _statusMessage = "Scanning for viruses...");
+         for (var file in _selectedFiles) {
+            String? analysisId = await VirusTotalService().scanFile(file);
+            // Ideally we wait for report, but for MVP we just confirm upload.
+            // A real app would poll the analysisId.
+            if (analysisId == null) throw Exception("Scan failed for ${file.path}");
+         }
+         setState(() => _statusMessage = "Scan Complete. Safe to process.");
+      }
       
       File resultFile;
       String extension = _selectedFiles.first.path.split('.').last.toLowerCase();

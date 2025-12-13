@@ -12,6 +12,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _apiKeyController = TextEditingController();
   final _vtService = VirusTotalService();
   bool _isLoading = true;
+  bool _autoScanEnabled = false;
 
   @override
   void initState() {
@@ -24,6 +25,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (key != null) {
       _apiKeyController.text = key;
     }
+    bool autoScan = await _vtService.getAutoScanEnabled();
+    _autoScanEnabled = autoScan;
     setState(() => _isLoading = false);
   }
 
@@ -66,6 +69,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: _saveKey,
                       child: const Text("Save Key"),
                     ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  
+                  SwitchListTile(
+                    title: const Text("Auto-Scan Files"),
+                    subtitle: const Text("Automatically scan files with VirusTotal before converting."),
+                    value: _autoScanEnabled,
+                    onChanged: (val) {
+                      setState(() => _autoScanEnabled = val);
+                      _vtService.setAutoScanEnabled(val);
+                    },
                   ),
 
                   const Spacer(),
