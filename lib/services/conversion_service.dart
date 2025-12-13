@@ -9,9 +9,8 @@ import 'package:path_provider/path_provider.dart';
 class ConversionService {
   final Dio _dio = Dio();
   
-  // Replace with your local IP when testing on device (e.g., 192.168.1.x:8000)
-  // Or usage '10.0.2.2' for Android Emulator
-  static const String _backendUrl = 'http://10.0.2.2:8000'; 
+  // Production Backend (Google Cloud Run)
+  static const String _backendUrl = 'https://converter-app-117081560792.europe-west1.run.app'; 
 
   // --- LOCAL CONVERSIONS ---
 
