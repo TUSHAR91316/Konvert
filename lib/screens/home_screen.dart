@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
              const Text(
-              "Quick Actions",
+              "Convert File",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ).animate().fadeIn().slideX(),
             const SizedBox(height: 20),
@@ -84,10 +84,11 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
                 children: [
-                  _buildGridCard(context, "Images to PDF", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png'], 100),
-                  _buildGridCard(context, "Word to PDF", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
-                  _buildGridCard(context, "Excel to PDF", Icons.table_chart, Colors.green, 'pdf', ['xls', 'xlsx'], 300),
-                  _buildGridCard(context, "PPT to PDF", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
+                  _buildGridCard(context, "Images to PDF", "JPG, PNG, WEBP, HEIC", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png', 'webp', 'heic'], 100),
+                  _buildGridCard(context, "Word to PDF", "DOC, DOCX", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
+                  _buildGridCard(context, "Excel to PDF", "XLS, XLSX", Icons.table_chart, Colors.green, 'pdf', ['xls', 'xlsx'], 300),
+                  _buildGridCard(context, "PPT to PDF", "PPT, PPTX", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
+                  _buildGridCard(context, "Docs to PDF", "TXT, RTF, HTML", Icons.article, Colors.teal, 'pdf', ['txt', 'rtf', 'html', 'odt'], 500),
                 ],
               ),
             ),
@@ -97,12 +98,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGridCard(BuildContext context, String title, IconData icon, Color color, String format, List<String> extensions, int delay) {
+  Widget _buildGridCard(BuildContext context, String title, String subtitle, IconData icon, Color color, String format, List<String> extensions, int delay) {
     return InkWell(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format, allowedExtensions: extensions)));
       },
       child: Container(
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
@@ -112,15 +114,23 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 40),
+              child: Icon(icon, color: color, size: 32),
             ),
-            const SizedBox(height: 15),
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const SizedBox(height: 5),
+            Text(
+              subtitle, 
+              style: TextStyle(fontSize: 10, color: Colors.grey[700]), 
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),

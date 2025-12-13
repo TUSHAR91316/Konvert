@@ -75,7 +75,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
       String extension = _selectedFiles.first.path.split('.').last.toLowerCase();
 
        // HYBRID LOGIC
-      if (['jpg', 'jpeg', 'png'].contains(extension)) {
+      if (['jpg', 'jpeg', 'png', 'webp', 'heic'].contains(extension)) {
          // Local Image -> PDF
          // Only support Image -> PDF for local for MVP
          if (_targetFormat != 'pdf') throw Exception("Local conversion only supports PDF output for now.");
@@ -86,7 +86,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
       } else if (extension == 'pdf' && _selectedFiles.length > 1) {
          throw Exception("PDF Merging not fully wired yet"); 
       
-      } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'].contains(extension)) { // Added txt for broad support
+      } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'rtf', 'html', 'odt'].contains(extension)) { 
          // Backend Remote Conversion
          setState(() => _statusMessage = "Uploading to Backend...");
          resultFile = await _conversionService.convertRemote(
@@ -100,8 +100,13 @@ class _ConvertScreenState extends State<ConvertScreen> {
          throw Exception("Unsupported format for MVP: $extension");
       }
 
+      int sizeBytes = await resultFile.length();
+      double sizeKb = sizeBytes / 1024;
+      double sizeMb = sizeKb / 1024;
+      String sizeStr = sizeMb >= 1 ? "${sizeMb.toStringAsFixed(2)} MB" : "${sizeKb.toStringAsFixed(0)} KB";
+
       setState(() {
-        _statusMessage = "Success! Saved to ${resultFile.path}";
+        _statusMessage = "Success! (${sizeStr})\nSaved to ${resultFile.path.split('/').last}";
         _isConverting = false;
       });
 
@@ -132,26 +137,30 @@ class _ConvertScreenState extends State<ConvertScreen> {
         child: Column(
           children: [
             // File Picker Area
-            GestureDetector(
+              InkWell(
               onTap: _pickFiles,
+              borderRadius: BorderRadius.circular(20),
               child: Container(
-                height: 200,
+                height: 220,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: Colors.blue.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.blueAccent, width: 2, style: BorderStyle.solid),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.upload_file, size: 50, color: Colors.blue),
-                    const SizedBox(height: 10),
-                    Text(_selectedFiles.isEmpty ? "Tap to select files" : "${_selectedFiles.length} files selected"),
+                    const Icon(Icons.cloud_upload_outlined, size: 80, color: Colors.blueAccent),
+                    const SizedBox(height: 15),
+                    const Text("Tap to Select Files", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                    const SizedBox(height: 5),
+                    if (widget.allowedExtensions != null)
+                      Text("Supported: ${widget.allowedExtensions!.join(', ').toUpperCase()}", style: const TextStyle(color: Colors.grey)),
                   ],
                 ),
               ),
-            ),
+            ).animate().fadeIn().scale(),
             
             const SizedBox(height: 20),
             
@@ -254,18 +263,43 @@ class _ConvertScreenState extends State<ConvertScreen> {
 
              const SizedBox(height: 20),
 
-            // Convert Button
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: (_isConverting || _selectedFiles.isEmpty) ? null : _processConversion,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-                child: _isConverting 
-                   ? const CircularProgressIndicator(color: Colors.white)
-                   : Text("CONVERT TO ${_targetFormat.toUpperCase()}", style: const TextStyle(color: Colors.white, fontSize: 18)),
-              ),
-            ).animate(target: _selectedFiles.isNotEmpty ? 1 : 0).fadeIn().scale(),
+            // Convert Button or Progress
+            if (_isConverting)
+              Column(
+                children: [
+                   const LinearProgressIndicator(minHeight: 8, borderRadius: BorderRadius.all(Radius.circular(10))),
+                   const SizedBox(height: 10),
+                   Text(_statusMessage ?? "Processing...", style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600)),
+                ],
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: (_selectedFiles.isEmpty) ? null : _processConversion,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    elevation: 5,
+                  ),
+                  child: Text("CONVERT TO ${_targetFormat.toUpperCase()}", style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+              ).animate(target: _selectedFiles.isNotEmpty ? 1 : 0).fadeIn().scale(),
+
+            if (_statusMessage != null && !_isConverting && _statusMessage!.startsWith("Success"))
+               Container(
+                 margin: const EdgeInsets.only(top: 20),
+                 padding: const EdgeInsets.all(15),
+                 decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                 child: Row(
+                   children: [
+                     const Icon(Icons.check_circle, color: Colors.green),
+                     const SizedBox(width: 10),
+                     Expanded(child: Text(_statusMessage!, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
+                   ],
+                 ),
+               ).animate().fadeIn().slideY(begin: 0.5),
           ],
         ),
       ),
