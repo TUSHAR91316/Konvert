@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:converter_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:converter_app/main.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,20 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Konvert Dashboard'),
+        actions: [
+          IconButton(
+            icon: Icon(themeNotifier.value == ThemeMode.light ? Icons.dark_mode : Icons.light_mode),
+            onPressed: () {
+              // Simple toggle for MVP (System -> Light -> Dark -> Light...)
+              // Or just Light <-> Dark if we force one.
+              if (themeNotifier.value == ThemeMode.light) {
+                themeNotifier.value = ThemeMode.dark;
+              } else {
+                themeNotifier.value = ThemeMode.light;
+              }
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
