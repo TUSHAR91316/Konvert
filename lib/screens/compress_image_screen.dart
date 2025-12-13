@@ -290,10 +290,9 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                  ),
                ).animate().fadeIn().slideY(),
           ],
-        ),
-        ),
-      ),
-      ),
-    );
+        ), // Column
+        ), // SingleChildScrollView
+      ), // SafeArea
+    ); // Scaffold
   }
 }
