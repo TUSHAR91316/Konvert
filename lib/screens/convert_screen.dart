@@ -106,7 +106,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
       String sizeStr = sizeMb >= 1 ? "${sizeMb.toStringAsFixed(2)} MB" : "${sizeKb.toStringAsFixed(0)} KB";
 
       setState(() {
-        _statusMessage = "Success! (${sizeStr})\nSaved to ${resultFile.path.split('/').last}";
+        _statusMessage = "Success! ($sizeStr)\nSaved to ${resultFile.path.split('/').last}";
         _isConverting = false;
       });
 
@@ -145,7 +145,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
                 height: 220,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.05),
+                  color: Colors.blue.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.blueAccent, width: 2, style: BorderStyle.solid),
                 ),

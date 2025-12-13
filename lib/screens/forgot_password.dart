@@ -1,3 +1,4 @@
+import 'package:converter_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
@@ -74,15 +75,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              // Password reset logic here
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Password reset link sent to your email.'),
-                                ),
-                              );
+                              try {
+                                await AuthService().sendPasswordResetEmail(_emailController.text.trim());
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Password reset link sent to your email.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  Navigator.pop(context); // Go back to login
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
                             }
                           },
                           child: const Text('Send Reset Link'),

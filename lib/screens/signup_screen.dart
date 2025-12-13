@@ -201,19 +201,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            _signup();
+                          onPressed: () async {
                             if (_formSignupKey.currentState!.validate() &&
                                 agreeToPrivacyPolicy) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Sign-up successful!')),
+                              
+                              final user = await _auth.createUserWithEmailAndPassword(
+                                _emailController.text, 
+                                _passwordController.text
                               );
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SignInScreen()));
+
+                              if (user != null && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Sign-up successful!')),
+                                );
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SignInScreen()));
+                              } else if (context.mounted) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Sign-up failed. Email may be in use.')),
+                                );
+                              }
                             } else if (!agreeToPrivacyPolicy) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -310,8 +322,5 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ],
       ),
     );
-  }
-  Future<void> _signup() async{
-    await _auth.createUserWithEmailAndPassword(_emailController.text, _passwordController.text);
   }
 }

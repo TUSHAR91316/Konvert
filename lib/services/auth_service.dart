@@ -56,4 +56,13 @@ class AuthService {
     await _googleSignIn.signOut();
     await _auth.signOut();
   }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      log("Error sending password reset email: $e");
+      rethrow; // Let UI handle invalid email errors
+    }
+  }
 }
