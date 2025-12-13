@@ -1,5 +1,6 @@
 import 'package:converter_app/screens/convert_screen.dart';
-import 'package:converter_app/screens/settings_screen.dart'; // We'll create this next
+import 'package:converter_app/screens/history_screen.dart';
+import 'package:converter_app/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:converter_app/services/auth_service.dart';
@@ -60,8 +61,7 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.history,
               color: Colors.orangeAccent,
               onTap: () {
-                // TODO: Implement History Screen
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("History coming soon!")));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
               },
               delay: 400,
             ),

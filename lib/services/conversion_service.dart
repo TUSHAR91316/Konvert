@@ -15,7 +15,7 @@ class ConversionService {
 
   // --- LOCAL CONVERSIONS ---
 
-  Future<File> imagesToPdf(List<File> images) async {
+  Future<File> imagesToPdf(List<File> images, {String? outputDirPath}) async {
     final pdf = pw.Document();
 
     for (var imgFile in images) {
@@ -29,12 +29,18 @@ class ConversionService {
       ));
     }
 
-    return await _savePdf(pdf, "images_converted");
+    return await _savePdf(pdf, "images_converted", outputDirPath: outputDirPath);
   }
 
   // Helper to save PDF
-  Future<File> _savePdf(pw.Document pdf, String baseName) async {
-    final outputDir = await getTemporaryDirectory();
+  Future<File> _savePdf(pw.Document pdf, String baseName, {String? outputDirPath}) async {
+    final Directory outputDir;
+    if (outputDirPath != null) {
+      outputDir = Directory(outputDirPath);
+    } else {
+      outputDir = await getTemporaryDirectory();
+    }
+    
     final file = File("${outputDir.path}/${baseName}_${DateTime.now().millisecondsSinceEpoch}.pdf");
     await file.writeAsBytes(await pdf.save());
     return file;
@@ -42,7 +48,7 @@ class ConversionService {
 
   // --- REMOTE CONVERSIONS (Backend) ---
 
-  Future<File> convertRemote(File file, String targetFormat) async {
+  Future<File> convertRemote(File file, String targetFormat, {String? outputDirPath}) async {
     String fileName = file.path.split('/').last;
     
     FormData formData = FormData.fromMap({
@@ -59,7 +65,13 @@ class ConversionService {
         ),
       );
 
-      final outputDir = await getTemporaryDirectory();
+      final Directory outputDir;
+      if (outputDirPath != null) {
+        outputDir = Directory(outputDirPath);
+      } else {
+        outputDir = await getTemporaryDirectory();
+      }
+
       final outputFile = File("${outputDir.path}/converted_${DateTime.now().millisecondsSinceEpoch}.$targetFormat");
       await outputFile.writeAsBytes(response.data);
       return outputFile;

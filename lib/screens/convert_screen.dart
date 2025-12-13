@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:converter_app/services/conversion_service.dart';
+import 'package:converter_app/services/history_service.dart';
 import 'package:converter_app/services/virus_total_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,8 @@ class _ConvertScreenState extends State<ConvertScreen> {
   List<File> _selectedFiles = [];
   bool _isConverting = false;
   String? _statusMessage;
+  String _targetFormat = 'pdf'; // Default format
+  String? _outputDirectory;
   
   // Services
   final _conversionService = ConversionService();
@@ -50,23 +53,26 @@ class _ConvertScreenState extends State<ConvertScreen> {
       File resultFile;
       String extension = _selectedFiles.first.path.split('.').last.toLowerCase();
 
-      // HYBRID LOGIC
+       // HYBRID LOGIC
       if (['jpg', 'jpeg', 'png'].contains(extension)) {
          // Local Image -> PDF
+         // Only support Image -> PDF for local for MVP
+         if (_targetFormat != 'pdf') throw Exception("Local conversion only supports PDF output for now.");
+         
          setState(() => _statusMessage = "Merging images locally...");
-         resultFile = await _conversionService.imagesToPdf(_selectedFiles);
+         resultFile = await _conversionService.imagesToPdf(_selectedFiles, outputDirPath: _outputDirectory);
       
       } else if (extension == 'pdf' && _selectedFiles.length > 1) {
-         // Local PDF Merge (Example - need to implement mergePdfs in service if not already)
-         // For now, let's assume single PDF just stays PDF or we merge.
-         // Calling a placeholder merge function (needs impl in service)
-         // resultFile = await _conversionService.mergePdfs(_selectedFiles);
          throw Exception("PDF Merging not fully wired yet"); 
       
-      } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx'].contains(extension)) {
+      } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'].contains(extension)) { // Added txt for broad support
          // Backend Remote Conversion
          setState(() => _statusMessage = "Uploading to Backend...");
-         resultFile = await _conversionService.convertRemote(_selectedFiles.first, "pdf");
+         resultFile = await _conversionService.convertRemote(
+           _selectedFiles.first, 
+           _targetFormat, 
+           outputDirPath: _outputDirectory
+         );
       
       } else {
          // Fallback or unsupported
@@ -77,6 +83,13 @@ class _ConvertScreenState extends State<ConvertScreen> {
         _statusMessage = "Success! Saved to ${resultFile.path}";
         _isConverting = false;
       });
+
+      // Log to History
+      await HistoryService().addEntry(
+        originalName: _selectedFiles.first.path.split('/').last, 
+        targetFormat: _targetFormat, 
+        resultPath: resultFile.path
+      );
 
       // Open result
       // await OpenFile.open(resultFile.path); // Needs open_file package
@@ -143,6 +156,75 @@ class _ConvertScreenState extends State<ConvertScreen> {
                 ),
               ),
 
+            // Format & Location Selection
+            if (_selectedFiles.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _targetFormat,
+                    isExpanded: true,
+                    hint: const Text("Select Format"),
+                    items: ['pdf', 'docx', 'jpg', 'png'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value.toUpperCase()),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        _targetFormat = newValue!;
+                      });
+                    },
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              InkWell(
+                onTap: () async {
+                  String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+                  if (selectedDirectory != null) {
+                    setState(() {
+                      _outputDirectory = selectedDirectory;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.folder_open, color: Colors.blue),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _outputDirectory ?? "Tap to Select Save Location",
+                          style: TextStyle(
+                              color: _outputDirectory != null ? Colors.black : Colors.grey[600]),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (_outputDirectory == null)
+                const Padding(
+                  padding: EdgeInsets.only(top: 5, left: 5),
+                  child: Text("Default: Temporary Folder", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ),
+            ],
+
              const SizedBox(height: 20),
 
              // Status
@@ -160,7 +242,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
                 child: _isConverting 
                    ? const CircularProgressIndicator(color: Colors.white)
-                   : const Text("CONVERT NOW", style: TextStyle(color: Colors.white, fontSize: 18)),
+                   : Text("CONVERT TO ${_targetFormat.toUpperCase()}", style: const TextStyle(color: Colors.white, fontSize: 18)),
               ),
             ).animate(target: _selectedFiles.isNotEmpty ? 1 : 0).fadeIn().scale(),
           ],
