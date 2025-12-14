@@ -88,7 +88,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
       
       } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'rtf', 'html', 'odt'].contains(extension)) { 
          // Backend Remote Conversion
-         setState(() => _statusMessage = "Uploading to Backend...");
+         setState(() => _statusMessage = "Converting...");
          resultFile = await _conversionService.convertRemote(
            _selectedFiles.first, 
            _targetFormat, 

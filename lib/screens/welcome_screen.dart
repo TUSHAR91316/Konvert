@@ -4,8 +4,28 @@ import 'package:converter_app/theme/theme.dart';
 import 'package:converter_app/widgets/custom_scaffold.dart';
 import 'package:converter_app/widgets/welcome_button.dart';
 import 'package:flutter/material.dart';
-class WelcomeScreen extends StatelessWidget {
+import 'package:permission_handler/permission_handler.dart';
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    // Request storage permissions on startup
+    await [
+      Permission.storage,
+      Permission.manageExternalStorage, // For Android 11+
+    ].request();
+  }
 
   @override
   Widget build(BuildContext context) {
