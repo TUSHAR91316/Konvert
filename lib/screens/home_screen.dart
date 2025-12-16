@@ -190,7 +190,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-    ).animate(delay: Duration(milliseconds: delay)).fadeIn().scale();
+    );
   }
 
   Widget _buildCompressionCard(BuildContext context, String title, String subtitle, IconData icon, Color color, int delay, {VoidCallback? onTap}) {
@@ -231,6 +231,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-    ).animate(delay: Duration(milliseconds: delay)).fadeIn().scale();
+    );
   }
 }
