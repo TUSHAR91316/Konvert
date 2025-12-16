@@ -44,7 +44,7 @@ class HomeScreen extends StatelessWidget {
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Text(
-                  (user?.displayName ?? "G")[0].toUpperCase(),
+                  ((user?.displayName ?? "Guest").isEmpty ? "G" : (user?.displayName ?? "Guest")[0]).toUpperCase(),
                   style: const TextStyle(fontSize: 40.0),
                 ),
               ),
@@ -104,7 +104,7 @@ class HomeScreen extends StatelessWidget {
              const Text(
               "Convert File",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ).animate().fadeIn().slideX(),
+            ),
             const SizedBox(height: 20),
             
             // CONVERSION GRID
@@ -128,7 +128,7 @@ class HomeScreen extends StatelessWidget {
             const Text(
               "Compression Tools",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ).animate().fadeIn().slideX(delay: const Duration(milliseconds: 200)),
+            ),
             
             const SizedBox(height: 20),
             

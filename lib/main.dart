@@ -2,6 +2,8 @@ import 'package:converter_app/firebase_options.dart';
 import 'package:converter_app/screens/welcome_screen.dart';
 import 'package:converter_app/theme/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:converter_app/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
@@ -28,7 +30,16 @@ class MyApp extends StatelessWidget {
           theme: lightmode,
           darkTheme: darkmode,
           themeMode: mode,
-          home: const WelcomeScreen(),
+          home: StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return const HomeScreen();
+              } else {
+                return const WelcomeScreen();
+              }
+            },
+          ),
         );
       },
     );
