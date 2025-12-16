@@ -29,10 +29,7 @@ class _SignInScreenState extends State<SignInScreen> {
         );
         if (credential.user != null) {
           if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
+             Navigator.of(context).popUntil((route) => route.isFirst);
           }
         }
       } on FirebaseAuthException catch (e) {
@@ -257,10 +254,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               try {
                                 final user = await AuthService().signInWithGoogle();
                                 if (user != null && context.mounted) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                                  );
+                                   Navigator.of(context).popUntil((route) => route.isFirst);
                                 }
                               } catch (e) {
                                 if (context.mounted) {
