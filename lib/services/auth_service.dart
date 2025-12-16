@@ -48,7 +48,7 @@ class AuthService {
       return userCredential.user;
     } catch (e) {
       log("Error executing Google Sign-In: $e");
-      return null;
+      rethrow; // Use rethrow to let UI handle the error
     }
   }
 

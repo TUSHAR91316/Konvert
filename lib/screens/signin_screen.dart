@@ -254,12 +254,23 @@ class _SignInScreenState extends State<SignInScreen> {
                           IconButton(
                             icon: const FaIcon(FontAwesomeIcons.google, size: 35, color: Colors.blue),
                             onPressed: () async {
-                              final user = await AuthService().signInWithGoogle();
-                              if (user != null && context.mounted) {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                                );
+                              try {
+                                final user = await AuthService().signInWithGoogle();
+                                if (user != null && context.mounted) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Google Sign-In Failed: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
                             },
                           ),

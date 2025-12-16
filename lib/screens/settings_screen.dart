@@ -78,6 +78,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: const Text("Automatically scan files with VirusTotal before converting."),
                     value: _autoScanEnabled,
                     onChanged: (val) {
+                      if (val && _apiKeyController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please enter and save an API Key first!"), backgroundColor: Colors.red),
+                        );
+                        return;
+                      }
+                      
                       setState(() => _autoScanEnabled = val);
                       _vtService.setAutoScanEnabled(val);
                     },
