@@ -6,11 +6,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ConversionService {
   final Dio _dio = Dio();
   
   // Production Backend (Google Cloud Run)
-  static const String _backendUrl = 'https://converter-app-117081560792.europe-west1.run.app'; 
+  static String _backendUrl = dotenv.env['BACKEND_URL'] ?? 'http://localhost:8080'; 
 
   // --- LOCAL CONVERSIONS ---
 

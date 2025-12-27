@@ -9,8 +9,33 @@ import 'package:converter_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:converter_app/main.dart';
 
-class HomeScreen extends StatelessWidget {
+import 'package:permission_handler/permission_handler.dart';
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+     super.initState();
+     _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    // For Android 11+ (API 30+)
+    if (await Permission.manageExternalStorage.isDenied) {
+      await Permission.manageExternalStorage.request();
+    }
+    
+    // For older Android versions or if manage storage is not applicable
+    if (await Permission.storage.isDenied) {
+      await Permission.storage.request();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

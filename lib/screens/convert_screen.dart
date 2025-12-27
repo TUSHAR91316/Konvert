@@ -26,6 +26,11 @@ class _ConvertScreenState extends State<ConvertScreen> {
   void initState() {
     super.initState();
     _targetFormat = widget.initialFormat;
+    
+    // Set default output directory to Downloads on Android
+    if (Platform.isAndroid) {
+      _outputDirectory = "/storage/emulated/0/Download";
+    }
   }
   
   // Services
@@ -135,40 +140,42 @@ class _ConvertScreenState extends State<ConvertScreen> {
       body: SafeArea(
         child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
-        child: Column(
-          children: [
-            // File Picker Area
-              InkWell(
-              onTap: _pickFiles,
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                height: 220,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.blueAccent, width: 2, style: BorderStyle.solid),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // File Picker Area
+                InkWell(
+                onTap: _pickFiles,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  height: 220,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.blueAccent, width: 2, style: BorderStyle.solid),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.cloud_upload_outlined, size: 80, color: Colors.blueAccent),
+                      const SizedBox(height: 15),
+                      const Text("Tap to Select Files", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                      const SizedBox(height: 5),
+                      if (widget.allowedExtensions != null)
+                        Text("Supported: ${widget.allowedExtensions!.join(', ').toUpperCase()}", style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.cloud_upload_outlined, size: 80, color: Colors.blueAccent),
-                    const SizedBox(height: 15),
-                    const Text("Tap to Select Files", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
-                    const SizedBox(height: 5),
-                    if (widget.allowedExtensions != null)
-                      Text("Supported: ${widget.allowedExtensions!.join(', ').toUpperCase()}", style: const TextStyle(color: Colors.grey)),
-                  ],
-                ),
-              ),
-            ).animate().fadeIn().scale(),
-            
-            const SizedBox(height: 20),
-            
-            // File List
-            if (_selectedFiles.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
+              ).animate().fadeIn().scale(),
+              
+              const SizedBox(height: 20),
+              
+              // File List
+              if (_selectedFiles.isNotEmpty)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: _selectedFiles.length,
                   itemBuilder: (context, index) {
                     return ListTile(
@@ -185,7 +192,6 @@ class _ConvertScreenState extends State<ConvertScreen> {
                     );
                   },
                 ),
-              ),
 
             // Format & Location Selection
             if (_selectedFiles.isNotEmpty) ...[
@@ -304,8 +310,9 @@ class _ConvertScreenState extends State<ConvertScreen> {
                ).animate().fadeIn().slideY(begin: 0.5),
           ],
         ),
-        ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
