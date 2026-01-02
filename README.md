@@ -59,7 +59,7 @@ Why download Konvert? It offers a **Hybrid** advantage:
 - **Security**: VirusTotal API + Flutter Secure Storage
 - **Tools**: `flutter_image_compress`, `file_picker`, `firebase_auth`
 
-## 🚀 Getting Started
+## 🚀 Getting Started!
 
 1.  **Clone the repo**
 2.  **Run Backend (Docker)**:
