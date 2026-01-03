@@ -1,7 +1,7 @@
 # Konvert - Advanced File Management & Conversion Tool
 
 <p align="center">
-  <img src="assets/images/app_icon.png" width="150" alt="Konvert Logo">
+  <img src="assets/images/readme_icon.png" width="150" alt="Konvert Logo">
 </p>
 
 Konvert is a hybrid, secure, and powerful mobile application designed to handle file conversions and compression with a focus on **User Privacy** and **Security**. Unlike typical web tools, Konvert processes sensitive files (like Images) locally on your device whenever possible.
