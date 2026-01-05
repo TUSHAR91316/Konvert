@@ -70,9 +70,14 @@ class _SignInScreenState extends State<SignInScreen> {
       ],
       child: Column(
         children: [
-          const Expanded(
-            flex: 1,
-            child: SizedBox(height: 10),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Image.asset(
+                'assets/images/final_logo.png',
+                height: 100,
+              ),
+            ),
           ),
           Expanded(
             flex: 7,

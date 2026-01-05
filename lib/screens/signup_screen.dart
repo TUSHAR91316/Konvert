@@ -36,14 +36,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return CustomScaffold(
       child: Column(
         children: [
-          const Expanded(
-            flex: 1,
-            child: SizedBox(height: 10),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Image.asset(
+                'assets/images/final_logo.png',
+                height: 80,
+              ),
+            ),
           ),
           Expanded(
             flex: 7,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(25.0, 50.0, 25.0, 20.0),
+              padding: const EdgeInsets.fromLTRB(25.0, 30.0, 25.0, 20.0),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -65,7 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           color: lightColorScheme.primary,
                         ),
                       ),
-                      const SizedBox(height: 40.0),
+                      const SizedBox(height: 30.0),
                       TextFormField(
                         controller: _fullNameController,
                         validator: (value) {
@@ -88,7 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       TextFormField(
                         controller: _emailController,
                         validator: (value) {
@@ -111,7 +116,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
@@ -136,7 +141,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       TextFormField(
                         controller: _confirmPasswordController,
                         obscureText: true,
@@ -164,7 +169,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       Row(
                         children: [
                           Checkbox(
@@ -197,7 +202,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -237,7 +242,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: const Text('Sign Up'),
                         ),
                       ),
-                      const SizedBox(height: 30.0),
+                      const SizedBox(height: 25.0),
                       const Row(
                         children: [
                           Expanded(
@@ -261,7 +266,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -277,7 +282,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 if (user != null && context.mounted) {
                                   Navigator.pushReplacement(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const SignInScreen()), // Or Home, but SignUp usually redirects to SignIn or Home. Logic says SignInScreen.
+                                    MaterialPageRoute(builder: (context) => const SignInScreen()), 
                                   );
                                 }
                               },
@@ -286,7 +291,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

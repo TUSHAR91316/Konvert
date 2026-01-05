@@ -48,8 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(themeNotifier.value == ThemeMode.light ? Icons.dark_mode : Icons.light_mode),
             onPressed: () {
-              // Simple toggle for MVP (System -> Light -> Dark -> Light...)
-              // Or just Light <-> Dark if we force one.
               if (themeNotifier.value == ThemeMode.light) {
                 themeNotifier.value = ThemeMode.dark;
               } else {
@@ -68,9 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
               accountEmail: Text(user?.email ?? "Sign in to sync history"),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Text(
-                  ((user?.displayName ?? "Guest").isEmpty ? "G" : (user?.displayName ?? "Guest")[0]).toUpperCase(),
-                  style: const TextStyle(fontSize: 40.0),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/final_logo.png',
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               decoration: const BoxDecoration(
