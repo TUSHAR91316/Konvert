@@ -4,6 +4,11 @@
   <img src="assets/images/readme_icon.png" width="150" alt="Konvert Logo">
 </p>
 
+<p align="center">
+  <img src="https://github.com/TUSHAR91316/Project1911/actions/workflows/flutter_ci.yml/badge.svg" alt="Flutter CI">
+  <img src="https://github.com/TUSHAR91316/Project1911/actions/workflows/backend_ci.yml/badge.svg" alt="Backend CI">
+</p>
+
 Konvert is a hybrid, secure, and powerful mobile application designed to handle file conversions and compression with a focus on **User Privacy** and **Security**. Unlike typical web tools, Konvert processes sensitive files (like Images) locally on your device whenever possible.
 
 ## 🌟 Key Features
@@ -58,6 +63,16 @@ Why download Konvert? It offers a **Hybrid** advantage:
 - **Backend**: Python (FastAPI) + LibreOffice (in Docker)
 - **Security**: VirusTotal API + Flutter Secure Storage
 - **Tools**: `flutter_image_compress`, `file_picker`, `firebase_auth`
+- **CI/CD**: GitHub Actions (Automated Testing & Building)
+
+## 🔄 CI/CD Pipeline
+
+This project uses **GitHub Actions** to enjoy a modern DevOps workflow.
+
+| Workflow | Status | Description |
+| :--- | :--- | :--- |
+| **Flutter CI** | ![Flutter CI](https://github.com/TUSHAR91316/Project1911/actions/workflows/flutter_ci.yml/badge.svg) | Automatically lints, tests, and builds the Android APK on every push. **Artifacts (APKs) are downloadable** from the Actions tab. |
+| **Backend CI** | ![Backend CI](https://github.com/TUSHAR91316/Project1911/actions/workflows/backend_ci.yml/badge.svg) | Lints Python code and verifies the Docker build to prevent deployment errors. |
 
 ## 🚀 Getting Started!
 
