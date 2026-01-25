@@ -11,6 +11,7 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend_ci.yml'
+  workflow_dispatch:
 
 jobs:
   build-and-test:
