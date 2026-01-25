@@ -1,9 +1,7 @@
 import 'package:converter_app/firebase_options.dart';
-import 'package:converter_app/screens/welcome_screen.dart';
 import 'package:converter_app/theme/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:converter_app/screens/home_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 

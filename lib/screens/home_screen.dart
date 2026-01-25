@@ -4,7 +4,6 @@ import 'package:converter_app/screens/history_screen.dart';
 import 'package:converter_app/screens/settings_screen.dart';
 import 'package:converter_app/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:converter_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:converter_app/main.dart';

@@ -12,7 +12,7 @@ class ConversionService {
   final Dio _dio = Dio();
   
   // Production Backend (Google Cloud Run)
-  static String _backendUrl = dotenv.env['BACKEND_URL'] ?? 'http://localhost:8080'; 
+  static final String _backendUrl = dotenv.env['BACKEND_URL'] ?? 'http://localhost:8080'; 
 
   // --- LOCAL CONVERSIONS ---
 

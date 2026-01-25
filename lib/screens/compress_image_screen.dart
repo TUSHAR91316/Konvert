@@ -173,14 +173,18 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                     Expanded(child: RadioListTile(
                       title: const Text("Percentage"), 
                       value: 0, 
+                      // ignore: deprecated_member_use
                       groupValue: _mode, 
+                      // ignore: deprecated_member_use
                       onChanged: (v) => setState(() => _mode = v!),
                       contentPadding: EdgeInsets.zero,
                     )),
                     Expanded(child: RadioListTile(
                       title: const Text("Target Size"), 
                       value: 1, 
+                       // ignore: deprecated_member_use
                       groupValue: _mode, 
+                       // ignore: deprecated_member_use
                       onChanged: (v) => setState(() => _mode = v!),
                       contentPadding: EdgeInsets.zero,
                     )),
@@ -219,6 +223,7 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                        Expanded(
                          flex: 1,
                          child: DropdownButtonFormField<String>(
+                           // ignore: deprecated_member_use
                            value: _sizeUnit,
                            items: const [
                              DropdownMenuItem(value: 'KB', child: Text('KB')),
