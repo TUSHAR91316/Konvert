@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import subprocess
 import uuid
@@ -17,7 +18,12 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 async def convert_file(file: UploadFile = File(...), target_format: str = "pdf"):
     # 1. Save uploaded file
     file_id = str(uuid.uuid4())
-    input_filename = f"{file_id}_{file.filename}"
+    
+    # Sanitize filename to prevent path traversal
+    safe_filename = os.path.basename(file.filename) if file.filename else "upload"
+    safe_filename = re.sub(r'[^a-zA-Z0-9.-]', '_', safe_filename)
+    
+    input_filename = f"{file_id}_{safe_filename}"
     input_path = os.path.join(UPLOAD_DIR, input_filename)
     
     with open(input_path, "wb") as buffer:
@@ -39,6 +45,7 @@ async def convert_file(file: UploadFile = File(...), target_format: str = "pdf")
             "--headless",
             "--convert-to", target_format,
             "--outdir", OUTPUT_DIR,
+            "--",
             input_path
         ]
         

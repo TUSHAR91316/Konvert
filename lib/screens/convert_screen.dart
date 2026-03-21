@@ -66,12 +66,16 @@ class _ConvertScreenState extends State<ConvertScreen> {
       String? apiKey = await VirusTotalService().getApiKey();
       
       if (autoScan && apiKey != null && apiKey.isNotEmpty) {
-         setState(() => _statusMessage = "Scanning for viruses...");
+         setState(() => _statusMessage = "Scanning with VirusTotal...");
          for (var file in _selectedFiles) {
-            String? analysisId = await VirusTotalService().scanFile(file);
-            // Ideally we wait for report, but for MVP we just confirm upload.
-            // A real app would poll the analysisId.
-            if (analysisId == null) throw Exception("Scan failed for ${file.path}");
+            try {
+              String? analysisId = await VirusTotalService().scanFile(file);
+              if (analysisId == null) throw Exception("Scan failed for ${file.path}");
+            } catch (e) {
+              // Format the exception string nicely
+              final msg = e.toString().replaceFirst('Exception: ', '');
+              throw Exception("VirusTotal Blocked Conversion: $msg");
+            }
          }
          setState(() => _statusMessage = "Scan Complete. Safe to process.");
       }
@@ -89,7 +93,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
          resultFile = await _conversionService.imagesToPdf(_selectedFiles, outputDirPath: _outputDirectory);
       
       } else if (extension == 'pdf' && _selectedFiles.length > 1) {
-         throw Exception("PDF Merging not fully wired yet"); 
+         throw "Multiple PDFs merging is not supported yet. Please select only one PDF."; 
       
       } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'rtf', 'html', 'odt'].contains(extension)) { 
          // Backend Remote Conversion

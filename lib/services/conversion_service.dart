@@ -9,7 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConversionService {
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(minutes: 1),
+      sendTimeout: const Duration(minutes: 5),
+      receiveTimeout: const Duration(minutes: 5),
+    ),
+  );
   
   // Production Backend (Google Cloud Run)
   static final String _backendUrl = dotenv.env['BACKEND_URL'] ?? 'http://localhost:8080'; 
@@ -78,7 +84,29 @@ class ConversionService {
       return outputFile;
 
     } on DioException catch (e) {
-      throw Exception("Remote Conversion Failed: ${e.message}");
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 503) {
+        throw Exception(
+          "Conversion server is temporarily unavailable (503). "
+          "It may be starting up — please wait a moment and try again.",
+        );
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw Exception(
+          "Conversion timed out. The file may be too large or the server is busy. "
+          "Please try again.",
+        );
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw Exception(
+          "Could not reach the conversion server. "
+          "Please check your internet connection.",
+        );
+      } else {
+        throw Exception(
+          "Remote Conversion Failed (${statusCode ?? 'unknown'}): ${e.message}",
+        );
+      }
     }
   }
 }

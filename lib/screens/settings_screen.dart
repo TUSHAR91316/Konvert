@@ -91,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                   const Spacer(),
-                  const Center(child: Text("Version 1.0.0 (Hybrid MVP)", style: TextStyle(color: Colors.grey))),
+                  const Center(child: Text("Version 1.5.0 (Hybrid MVP)", style: TextStyle(color: Colors.grey))),
                 ],
               ),
             ),
