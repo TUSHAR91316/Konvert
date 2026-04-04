@@ -76,12 +76,30 @@ This project uses **GitHub Actions** to enjoy a modern DevOps workflow.
 
 ## 🚀 Getting Started!
 
-1.  **Clone the repo**
-2.  **Run Backend (Docker)**:
-    ```bash
-    docker run -p 8000:8000 konvert-backend
-    ```
-3.  **Run App**:
-    ```bash
-    flutter run
-    ```
+This application relies on a local Docker backend securely exposed via a Cloudflare Tunnel, eliminating cloud hosting costs while retaining global accessibility for your mobile app.
+
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/TUSHAR91316/converter_app.git
+   ```
+2. **Run the Backend (Docker)**:
+   Navigate to the `backend/` folder and run the container locally on port 8080:
+   ```bash
+   cd backend
+   docker build -t converter-backend .
+   docker run -d -p 8080:8080 converter-backend
+   ```
+3. **Start the Cloudflare Tunnel**:
+   Expose your local backend to the internet securely using `cloudflared`:
+   ```bash
+   cloudflared tunnel --url http://localhost:8080
+   ```
+4. **Update App Credentials**:
+   Copy the `.trycloudflare.com` URL generated in the previous step and paste it into your `.env` file at the root of your Flutter project:
+   ```env
+   BACKEND_URL=https://your-generated-url.trycloudflare.com
+   ```
+5. **Run the App**:
+   ```bash
+   flutter run
+   ```
