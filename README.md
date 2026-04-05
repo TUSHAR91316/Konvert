@@ -85,29 +85,26 @@ This project uses **GitHub Actions** to enjoy a modern DevOps workflow.
 
 ## 🚀 Getting Started!
 
-This application relies on a local Docker backend securely exposed via a Cloudflare Tunnel, eliminating cloud hosting costs while retaining global accessibility for your mobile app.
+This application relies on a local Docker backend securely exposed via an ngrok Tunnel with a static domain, eliminating cloud hosting costs while retaining global accessibility for your mobile app.
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/TUSHAR91316/converter_app.git
-   ```
+1. **Download the Backend Files**
+   Because Konvert is closed-source, you can download the backend server files (`backend.zip`) directly from our [Public GitHub Releases Page](https://github.com/TUSHAR91316/Konvert-Website/releases). Extract this `backend.zip` folder to your computer.
 2. **Run the Backend (Docker)**:
-   Navigate to the `backend/` folder and run the container locally on port 8080:
+   Navigate to the extracted `backend/` folder and run the container locally on port 8080:
    ```bash
-   cd backend
    docker build -t converter-backend .
    docker run -d -p 8080:8080 converter-backend
    ```
-3. **Start the Cloudflare Tunnel**:
-   Expose your local backend to the internet securely using `cloudflared`:
+3. **Start the ngrok Tunnel**:
+   Expose your local backend to the internet securely using `ngrok` (with your static domain):
    ```bash
-   cloudflared tunnel --url http://localhost:8080
+   ngrok http --domain=your-static-domain.ngrok-free.app 8080
+   ```
+   *Tip: If you use a personal Windows device, you can run ngrok silently by creating a `.bat` file with:*
+   ```bat
+   @ECHO OFF
+   Start-Process ngrok -ArgumentList "http --domain=your-static-domain.ngrok-free.app 8080" -WindowStyle Hidden
    ```
 4. **Configure App Settings**:
-   Launch the app on your device/emulator. Navigate to the **Settings** screen inside Konvert and paste the `.trycloudflare.com` URL into the "Backend URL" field to connect globally instantly!
-   *(Note: You no longer need to edit `.env` or rebuild the APK when the tunnel URL rotates!)*
-   
-5. **Run the App**:
-   ```bash
-   flutter run
-   ```
+   Launch the app on your device/emulator. Navigate to the **Settings** screen inside Konvert and paste your static `.ngrok-free.app` URL into the "Backend URL" field to connect globally instantly!
+   *(Note: You no longer need to edit `.env` or rebuild the APK!)*
