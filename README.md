@@ -25,7 +25,7 @@ Konvert is a hybrid, secure, and powerful mobile application designed to handle 
 ### 1. 🔄 Smart File Conversion
 - **Hybrid Engine**: Automatically chooses the best way to convert your file.
     - **Local**: Images to PDF (Processed entirely on-device).
-    - **Cloud**: complex docs (DOCX, XLSX, PPTX) are handled securely by our backend (LibreOffice).
+    - **Self-Hosted**: complex docs (DOCX, XLSX, PPTX) are handled securely by your own personal backend (LibreOffice).
 - **Supported Formats**:
     - **Images**: JPG, PNG, WEBP, HEIC ➡️ PDF
     - **Documents**: DOC, DOCX, TXT, RTF, ODT, HTML ➡️ PDF
@@ -40,7 +40,7 @@ Konvert is a hybrid, secure, and powerful mobile application designed to handle 
 ### 3. 🛡️ Advanced Security
 - **Auto-Scan Integration**: Connect your **VirusTotal API Key** in Settings.
 - **Automatic Safety**: If enabled, files are strictly scanned for malware *before* any conversion starts.
-- **Privacy First**: We don't store your files. Cloud conversions are temporary and deleted immediately after processing.
+- **Privacy First**: We don't store your files. Self-Hosted conversions are temporary and deleted immediately after processing.
 
 ### 4. 📜 History & Management
 - **Conversion History**: Keep track of all your past tasks.
@@ -56,7 +56,7 @@ Why download Konvert? It offers a **Hybrid** advantage:
 | Feature | 🚀 Konvert App | 🌐 Typical Web Converter |
 | :--- | :--- | :--- |
 | **Images** (Privacy) | **100% Offline**: Processed on your phone. No upload. | **Online**: Must upload photos to server. |
-| **Documents** (Docs/PPT) | **Secure Cloud**: Uploaded, processed, then **instantly deleted**. | **Unknown**: Files often stored for hours/days. |
+| **Documents** (Docs/PPT) | **Self-Hosted**: Sent to your personal server, processed, then **instantly deleted**. | **Unknown**: Files often stored for hours/days. |
 | **Security** | **VirusTotal Auto-Scan** checks files before upload. | No virus scanning. |
 | **Speed** | **Instant** for local tools (Images). | **Slow**: Dependent on upload speed. |
 | **History** | **Local Log**: Keeps your history private on-device. | **None**: Data lost after closing tab. |
