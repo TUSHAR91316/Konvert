@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:converter_app/services/config_service.dart';
 
 class ConversionService {
   final Dio _dio = Dio(
@@ -16,9 +17,6 @@ class ConversionService {
       receiveTimeout: const Duration(minutes: 5),
     ),
   );
-  
-  // Production Backend (Google Cloud Run)
-  static final String _backendUrl = dotenv.env['BACKEND_URL'] ?? 'http://localhost:8080'; 
 
   // --- LOCAL CONVERSIONS ---
 
@@ -63,8 +61,9 @@ class ConversionService {
     });
 
     try {
+      final String dynamicBackendUrl = await ConfigService().getBackendUrl();
       final response = await _dio.post(
-        '$_backendUrl/convert',
+        '$dynamicBackendUrl/convert',
         data: formData,
         queryParameters: {'target_format': targetFormat},
         options: Options(

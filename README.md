@@ -94,11 +94,10 @@ This application relies on a local Docker backend securely exposed via a Cloudfl
    ```bash
    cloudflared tunnel --url http://localhost:8080
    ```
-4. **Update App Credentials**:
-   Copy the `.trycloudflare.com` URL generated in the previous step and paste it into your `.env` file at the root of your Flutter project:
-   ```env
-   BACKEND_URL=https://your-generated-url.trycloudflare.com
-   ```
+4. **Configure App Settings**:
+   Launch the app on your device/emulator. Navigate to the **Settings** screen inside Konvert and paste the `.trycloudflare.com` URL into the "Backend URL" field to connect globally instantly!
+   *(Note: You no longer need to edit `.env` or rebuild the APK when the tunnel URL rotates!)*
+   
 5. **Run the App**:
    ```bash
    flutter run

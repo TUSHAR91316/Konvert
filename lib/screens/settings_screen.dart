@@ -1,4 +1,5 @@
 import 'package:converter_app/services/virus_total_service.dart';
+import 'package:converter_app/services/config_service.dart';
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -10,7 +11,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _apiKeyController = TextEditingController();
+  final _backendUrlController = TextEditingController();
   final _vtService = VirusTotalService();
+  final _configService = ConfigService();
   bool _isLoading = true;
   bool _autoScanEnabled = false;
 
@@ -25,6 +28,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (key != null) {
       _apiKeyController.text = key;
     }
+    
+    String url = await _configService.getBackendUrl();
+    _backendUrlController.text = url;
+    
     bool autoScan = await _vtService.getAutoScanEnabled();
     _autoScanEnabled = autoScan;
     setState(() => _isLoading = false);
@@ -34,6 +41,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _vtService.setApiKey(_apiKeyController.text);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("API Key Saved!")));
+    }
+  }
+
+  Future<void> _saveBackendUrl() async {
+    await _configService.setBackendUrl(_backendUrlController.text);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Backend URL Saved!")));
     }
   }
 
@@ -48,6 +62,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text("Server Configuration", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  const Text("Adjust your Backend URL when testing locally with tools like Cloudflare Tunnels. This overrides the default .env configuration."),
+                  const SizedBox(height: 20),
+                  
+                  TextField(
+                    controller: _backendUrlController,
+                    decoration: const InputDecoration(
+                      labelText: "Backend URL",
+                      hintText: "https://your-tunnel.trycloudflare.com",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _saveBackendUrl,
+                      child: const Text("Save URL"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
                   const Text("VirusTotal Integration", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   const Text("Enter your VirusTotal API Key to enable scanning before conversion."),

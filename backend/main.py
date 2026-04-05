@@ -45,7 +45,6 @@ async def convert_file(file: UploadFile = File(...), target_format: str = "pdf")
             "--headless",
             "--convert-to", target_format,
             "--outdir", OUTPUT_DIR,
-            "--",
             input_path
         ]
         
