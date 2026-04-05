@@ -5,6 +5,15 @@
 </p>
 
 <p align="center">
+  <a href="https://konvert-website.vercel.app/">
+    <img src="https://img.shields.io/badge/Official-Website-blue?style=for-the-badge&logo=vercel" alt="Official Website">
+  </a>
+  <a href="https://www.amazon.in/PrivateByte-Labs-Konvert/dp/B0GDRZLHZ7/">
+    <img src="https://img.shields.io/badge/Get_it_on-Amazon_Appstore-orange?style=for-the-badge&logo=amazon" alt="Available on Amazon Appstore">
+  </a>
+</p>
+
+<p align="center">
   <img src="https://github.com/TUSHAR91316/converter_app/actions/workflows/flutter_ci.yml/badge.svg?branch=main" alt="Flutter CI">
   <img src="https://github.com/TUSHAR91316/converter_app/actions/workflows/backend_ci.yml/badge.svg?branch=main" alt="Backend CI">
 </p>
