@@ -1,24 +1,45 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class HistoryService {
-  static const String _fileName = 'conversion_history.json';
+  static Database? _database;
+  static const String _tableName = 'conversion_history';
 
-  Future<File> _getFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return File('${directory.path}/$_fileName');
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB('history.db');
+    return _database!;
+  }
+
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
+  }
+
+  Future _createDB(Database db, int version) async {
+    await db.execute('''
+CREATE TABLE $_tableName (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  originalName TEXT NOT NULL,
+  targetFormat TEXT NOT NULL,
+  resultPath TEXT NOT NULL,
+  timestamp TEXT NOT NULL
+)
+''');
   }
 
   Future<List<Map<String, dynamic>>> getHistory() async {
     try {
-      final file = await _getFile();
-      if (!await file.exists()) {
-        return [];
-      }
-      final content = await file.readAsString();
-      final List<dynamic> jsonList = jsonDecode(content);
-      return jsonList.cast<Map<String, dynamic>>();
+      final db = await database;
+      final results = await db.query(_tableName, orderBy: 'timestamp DESC');
+      // Convert Map<String, Object?> to Map<String, dynamic>
+      return results.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (e) {
       return [];
     }
@@ -29,25 +50,21 @@ class HistoryService {
     required String targetFormat,
     required String resultPath,
   }) async {
-    final history = await getHistory();
-    
-    final newEntry = {
-      'originalName': originalName,
-      'targetFormat': targetFormat,
-      'resultPath': resultPath,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-
-    history.insert(0, newEntry); // Add to beginning
-
-    final file = await _getFile();
-    await file.writeAsString(jsonEncode(history));
+    final db = await database;
+    await db.insert(
+      _tableName,
+      {
+        'originalName': originalName,
+        'targetFormat': targetFormat,
+        'resultPath': resultPath,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<void> clearHistory() async {
-    final file = await _getFile();
-    if (await file.exists()) {
-      await file.delete();
-    }
+    final db = await database;
+    await db.delete(_tableName);
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -93,7 +92,6 @@ class VirusTotalService {
       }
       _handleCommonErrors(e, 'VirusTotal Upload Failed');
     }
-    return null;
   }
 
   /// Throws a user-friendly exception for common VirusTotal HTTP errors.
