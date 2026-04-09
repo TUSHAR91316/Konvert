@@ -2,7 +2,6 @@ import 'package:converter_app/services/auth_service.dart';
 import 'package:converter_app/screens/forgot_password.dart';
 import 'package:converter_app/screens/home_screen.dart';
 import 'package:converter_app/screens/signup_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/theme.dart';
@@ -19,24 +18,24 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
+  final _auth = AuthService();
 
   Future<void> _signIn() async {
     if (_formSignInKey.currentState!.validate()) {
-      try {
-        final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-        if (credential.user != null) {
-          if (mounted) {
-             Navigator.of(context).popUntil((route) => route.isFirst);
-          }
+      final user = await _auth.loginUserWithEmailAndPassword(
+        _emailController.text,
+        _passwordController.text,
+      );
+      if (user != null) {
+        if (mounted) {
+           Navigator.of(context).popUntil((route) => route.isFirst);
         }
-      } on FirebaseAuthException catch (e) {
+      } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Sign-in failed: ${e.message}"),
+            const SnackBar(
+              content: Text("Sign-in failed. Please check your email and password."),
+              backgroundColor: Colors.red,
             ),
           );
         }

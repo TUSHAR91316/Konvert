@@ -220,11 +220,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   const SnackBar(
                                       content: Text('Sign-up successful!')),
                                 );
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const SignInScreen()));
+                                Navigator.of(context).popUntil((route) => route.isFirst);
                               } else if (context.mounted) {
                                  ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -280,10 +276,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               onPressed: () async {
                                 final user = await _auth.signInWithGoogle();
                                 if (user != null && context.mounted) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const SignInScreen()), 
-                                  );
+                                  Navigator.of(context).popUntil((route) => route.isFirst);
                                 }
                               },
                               icon: Icon(Bootstrap.google, size: 25, color: Colors.blue),
