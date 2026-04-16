@@ -5,6 +5,7 @@ import 'package:converter_app/screens/settings_screen.dart';
 import 'package:converter_app/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:converter_app/services/auth_service.dart';
+import 'package:converter_app/services/update_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:converter_app/main.dart';
 
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
      super.initState();
      _requestPermissions();
+     UpdateService().checkForUpdate(context);
   }
 
   Future<void> _requestPermissions() async {
