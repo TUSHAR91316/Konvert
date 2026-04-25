@@ -7,10 +7,14 @@
 - **In-App Update Notifier:** Konvert now automatically checks for updates via GitHub. Whenever a new version goes live, you will gently be prompted directly on the home screen to download the latest security patches and features.
 - **SQLite Optimization:** Migrated the background history tracking to a fast, reliable SQLite database framework.
 - **Microservice Architecture Alignment:** The frontend perfectly hands off processing to our optimized local FastAPI backend.
+- **Self-Hosting Backend Guide:** New dedicated screen with step-by-step instructions for deploying your own backend using Docker, ngrok, Cloudflare Tunnel, or any other tunneling service. Includes direct links to download backend files from GitHub and detailed setup instructions.
+- **Dynamic Version Display:** Settings page now displays the actual app version dynamically from the build configuration.
+- **Enhanced Server Configuration:** Updated UI with clearer descriptions for connecting to self-hosted backends via multiple tunneling providers.
 
 **Bug Fixes & Maintenance**
 - Fixed redundant API logic and code linting errors.
 - Improved the Authentication flow by enforcing cleaner `AuthService` abstraction and responsive Snackbar error handling.
+- Updated Server Configuration section text for clarity on self-hosting options.
 
 ---
 

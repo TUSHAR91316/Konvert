@@ -1,6 +1,7 @@
 import 'package:converter_app/services/virus_total_service.dart';
 import 'package:converter_app/services/config_service.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -16,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _configService = ConfigService();
   bool _isLoading = true;
   bool _autoScanEnabled = false;
+  String _appVersion = "Loading...";
 
   @override
   void initState() {
@@ -34,6 +36,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     
     bool autoScan = await _vtService.getAutoScanEnabled();
     _autoScanEnabled = autoScan;
+
+    // Load app version
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      _appVersion = packageInfo.version;
+    } catch (e) {
+      _appVersion = "1.6.2";
+    }
+    
     setState(() => _isLoading = false);
   }
 
@@ -64,14 +75,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   const Text("Server Configuration", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-                  const Text("Adjust your Backend URL when testing locally with tools like Cloudflare Tunnels. This overrides the default .env configuration."),
+                  const Text("Connect to your own backend server. Use ngrok, Cloudflare Tunnel, or any tunneling service to expose your local FastAPI server. This URL overrides the default configuration for document conversions."),
                   const SizedBox(height: 20),
                   
                   TextField(
                     controller: _backendUrlController,
                     decoration: const InputDecoration(
                       labelText: "Backend URL",
-                      hintText: "https://your-tunnel.trycloudflare.com",
+                      hintText: "https://abc123.ngrok-free.app or https://your-tunnel.cloudflare.com",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -131,7 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                   const Spacer(),
-                  const Center(child: Text("Version 1.5.0 (Hybrid MVP)", style: TextStyle(color: Colors.grey))),
+                  Center(child: Text("Version $_appVersion (Hybrid MVP)", style: const TextStyle(color: Colors.grey))),
                 ],
               ),
             ),

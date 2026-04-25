@@ -2,6 +2,7 @@ import 'package:converter_app/screens/compress_image_screen.dart';
 import 'package:converter_app/screens/convert_screen.dart';
 import 'package:converter_app/screens/history_screen.dart';
 import 'package:converter_app/screens/settings_screen.dart';
+import 'package:converter_app/screens/self_hosting_screen.dart';
 import 'package:converter_app/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:converter_app/services/auth_service.dart';
@@ -92,6 +93,14 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.cloud_download),
+              title: const Text('Self-Hosting Backend'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SelfHostingScreen()));
               },
             ),
             const Divider(),
