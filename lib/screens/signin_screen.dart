@@ -1,47 +1,29 @@
-import 'package:converter_app/services/auth_service.dart';
 import 'package:converter_app/screens/forgot_password.dart';
 import 'package:converter_app/screens/home_screen.dart';
 import 'package:converter_app/screens/signup_screen.dart';
+import 'package:converter_app/services/auth_service.dart';
+import 'package:converter_app/theme/app_colors.dart';
+import 'package:converter_app/theme/app_text_styles.dart';
+import 'package:converter_app/theme/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../theme/theme.dart';
-import '../widgets/custom_scaffold.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
+
   @override
   State<SignInScreen> createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final _formSignInKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+  // ✅ Both controllers disposed in dispose()
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
   final _auth = AuthService();
-
-  Future<void> _signIn() async {
-    if (_formSignInKey.currentState!.validate()) {
-      final user = await _auth.loginUserWithEmailAndPassword(
-        _emailController.text,
-        _passwordController.text,
-      );
-      if (user != null) {
-        if (mounted) {
-           Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Sign-in failed. Please check your email and password."),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
-  }
 
   @override
   void dispose() {
@@ -50,237 +32,280 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
+  Future<void> _signIn() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    final user = await _auth.loginUserWithEmailAndPassword(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (user != null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign-in failed. Check your email & password.')),
+      );
+    }
+  }
+
+  Future<void> _googleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await AuthService().signInWithGoogle();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (user != null) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In failed: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          },
-          child: const Text(
-            "Skip Login",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        )
-      ],
-      child: Column(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Image.asset(
-                'assets/images/final_logo.png',
-                height: 100,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 7,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(25.0, 50.0, 25.0, 20.0),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40.0),
-                  topRight: Radius.circular(40.0),
+    final isDark = context.isDark;
+
+    return Scaffold(
+      backgroundColor: context.scaffoldBg,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Logo + Header ──
+              Center(
+                child: ShaderMask(
+                  shaderCallback: (b) => KColors.primaryGradient.createShader(b),
+                  child: Text(
+                    'Konvert',
+                    style: KTextStyles.logo().copyWith(
+                      fontSize: 36,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-              child: SingleChildScrollView(
+              const SizedBox(height: 8),
+              Center(
+                child: Text('Welcome back', style: context.kBodySM),
+              ),
+              const SizedBox(height: 40),
+
+              // ── Form Card ──
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: isDark
+                    ? KDecorations.glassCard(radius: 24)
+                    : KDecorations.lightCard(radius: 24),
                 child: Form(
-                  key: _formSignInKey,
+                  key: _formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Welcome back',
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w900,
-                          color: lightColorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 40.0),
+                      Text('Sign In', style: context.kHeadlineMD),
+                      const SizedBox(height: 24),
+
+                      // Email
                       TextFormField(
                         controller: _emailController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          label: const Text('Email'),
-                          hintText: 'Enter your email',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Enter your email' : null,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'you@example.com',
+                          prefixIcon: Icon(Icons.mail_outline),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 16),
+
+                      // Password
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
-                        obscuringCharacter: '*',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          return null;
-                        },
+                        obscureText: _obscurePassword,
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Enter your password' : null,
                         decoration: InputDecoration(
-                          label: const Text('Password'),
-                          hintText: 'Enter your password',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
+                          labelText: 'Password',
+                          hintText: '••••••••',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              size: 18,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscurePassword = !_obscurePassword),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 12),
+
+                      // Remember me + Forgot password
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
                             children: [
-                              Checkbox(
-                                value: _rememberMe,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _rememberMe = value!;
-                                  });
-                                },
-                                activeColor: lightColorScheme.primary,
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Checkbox(
+                                  value: _rememberMe,
+                                  onChanged: (v) =>
+                                      setState(() => _rememberMe = v!),
+                                  activeColor: KColors.primary,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4)),
+                                ),
                               ),
-                              const Text(
-                                'Remember me',
-                                style: TextStyle(color: Colors.black45),
-                              ),
+                              const SizedBox(width: 8),
+                              Text('Remember me', style: context.kBodySM),
                             ],
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (e) => const ForgotPasswordScreen(),
-                                ),
-                              );
-                            },
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const ForgotPasswordScreen()),
+                            ),
                             child: Text(
                               'Forgot password?',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: lightColorScheme.primary,
-                              ),
+                              style: KTextStyles.bodySM(color: KColors.primary)
+                                  .copyWith(fontWeight: FontWeight.w600),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 25.0),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _signIn,
-                          child: const Text('Sign In'),
+                      const SizedBox(height: 24),
+
+                      // Sign In Button
+                      GestureDetector(
+                        onTap: _isLoading ? null : _signIn,
+                        child: Container(
+                          height: context.kButtonHeight,
+                          decoration: KDecorations.gradientButton(radius: 14),
+                          child: Center(
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text('SIGN IN', style: KTextStyles.button()),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 25.0),
+                      const SizedBox(height: 20),
+
+                      // Divider
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Don\'t have an account? ',
-                            style: TextStyle(color: Colors.black45),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                              );
-                            },
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: lightColorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 30.0),
-                      const Row(
                         children: [
                           Expanded(
-                            child: Divider(
-                              thickness: 0.5,
-                              color: Colors.black45,
-                            ),
-                          ),
+                              child: Divider(
+                                  color: isDark
+                                      ? Colors.white12
+                                      : KColors.lightOutlineVariant)),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Text(
-                              'Or continue with',
-                              style: TextStyle(color: Colors.black45),
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('or', style: context.kBodySM),
                           ),
                           Expanded(
-                            child: Divider(
-                              thickness: 0.5,
-                              color: Colors.black45,
-                            ),
-                          ),
+                              child: Divider(
+                                  color: isDark
+                                      ? Colors.white12
+                                      : KColors.lightOutlineVariant)),
                         ],
                       ),
-                      const SizedBox(height: 25.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const FaIcon(FontAwesomeIcons.google, size: 35, color: Colors.blue),
-                            onPressed: () async {
-                              try {
-                                final user = await AuthService().signInWithGoogle();
-                                if (user != null && context.mounted) {
-                                   Navigator.of(context).popUntil((route) => route.isFirst);
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Google Sign-In Failed: $e'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
+                      const SizedBox(height: 20),
+
+                      // Google Sign-In
+                      GestureDetector(
+                        onTap: _isLoading ? null : _googleSignIn,
+                        child: Container(
+                          height: 48,
+                          decoration: isDark
+                              ? KDecorations.ghostButtonDark(radius: 12)
+                              : KDecorations.ghostButtonLight(radius: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              FaIcon(FontAwesomeIcons.google,
+                                  size: 18, color: KColors.primary),
+                              const SizedBox(width: 10),
+                              Text('Continue with Google',
+                                  style: KTextStyles.button(color: KColors.primary)
+                                      .copyWith(fontSize: 14)),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
+              const SizedBox(height: 24),
+
+              // Sign up link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Don't have an account? ", style: context.kBodySM),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                    ),
+                    child: Text(
+                      'Sign Up',
+                      style: KTextStyles.bodySM(color: KColors.primary)
+                          .copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Skip
+              const SizedBox(height: 12),
+              Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    (route) => false,
+                  ),
+                  child: Text(
+                    'Continue as Guest',
+                    style: context.kBodySM
+                        .copyWith(decoration: TextDecoration.underline),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

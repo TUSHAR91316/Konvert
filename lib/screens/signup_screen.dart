@@ -1,10 +1,12 @@
 import 'package:converter_app/screens/privacy_policy.dart';
 import 'package:converter_app/screens/signin_screen.dart';
+import 'package:converter_app/screens/home_screen.dart';
+import 'package:converter_app/services/auth_service.dart';
+import 'package:converter_app/theme/app_colors.dart';
+import 'package:converter_app/theme/app_text_styles.dart';
+import 'package:converter_app/theme/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import '../theme/theme.dart';
-import '../widgets/custom_scaffold.dart';
-import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -14,13 +16,19 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _formSignupKey = GlobalKey<FormState>();
-  bool agreeToPrivacyPolicy = false;
-  final _auth=AuthService();
+  final _formKey = GlobalKey<FormState>();
+  // ✅ All 4 controllers disposed below — no leak
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  bool _agreeToPolicy = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+
+  final _auth = AuthService();
 
   @override
   void dispose() {
@@ -31,293 +39,316 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (!_agreeToPolicy) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please agree to the Privacy Policy')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final user = await _auth.createUserWithEmailAndPassword(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (user != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account created! Welcome to Konvert.')),
+      );
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign-up failed. Email may already be in use.')),
+      );
+    }
+  }
+
+  Future<void> _googleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _auth.signInWithGoogle();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (user != null) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In failed: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
-      child: Column(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Image.asset(
-                'assets/images/final_logo.png',
-                height: 80,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 7,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(25.0, 30.0, 25.0, 20.0),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40.0),
-                  topRight: Radius.circular(40.0),
+    final isDark = context.isDark;
+
+    return Scaffold(
+      backgroundColor: context.scaffoldBg,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: context.kPagePaddingTop(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Logo ──
+              Center(
+                child: ShaderMask(
+                  shaderCallback: (b) => KColors.primaryGradient.createShader(b),
+                  child: Text(
+                    'Konvert',
+                    style: KTextStyles.logo().copyWith(
+                      fontSize: 32,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-              child: SingleChildScrollView(
+              const SizedBox(height: 6),
+              Center(child: Text('Create your account', style: context.kBodySM)),
+              const SizedBox(height: 30),
+
+              // ── Form Card ──
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: isDark
+                    ? KDecorations.glassCard(radius: 24)
+                    : KDecorations.lightCard(radius: 24),
                 child: Form(
-                  key: _formSignupKey,
+                  key: _formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Get Started',
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w900,
-                          color: lightColorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 30.0),
+                      Text('Get Started', style: context.kHeadlineMD),
+                      const SizedBox(height: 22),
+
+                      // Full Name
                       TextFormField(
                         controller: _fullNameController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your full name';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          label: const Text('Full Name'),
-                          hintText: 'Enter your full name',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Enter your full name' : null,
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name',
+                          hintText: 'John Doe',
+                          prefixIcon: Icon(Icons.person_outline),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 14),
+
+                      // Email
                       TextFormField(
                         controller: _emailController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          label: const Text('Email'),
-                          hintText: 'Enter your email',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Enter your email' : null,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'you@example.com',
+                          prefixIcon: Icon(Icons.mail_outline),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 14),
+
+                      // Password
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
-                        obscuringCharacter: '*',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a password';
-                          }
-                          return null;
-                        },
+                        obscureText: _obscurePassword,
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Enter a password' : null,
                         decoration: InputDecoration(
-                          label: const Text('Password'),
-                          hintText: 'Create a password',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
+                          labelText: 'Password',
+                          hintText: '••••••••',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              size: 18,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscurePassword = !_obscurePassword),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 14),
+
+                      // Confirm Password
                       TextFormField(
                         controller: _confirmPasswordController,
-                        obscureText: true,
-                        obscuringCharacter: '*',
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != _passwordController.text) {
-                            return 'Passwords do not match';
-                          }
+                        obscureText: _obscureConfirm,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Confirm your password';
+                          if (v != _passwordController.text) return 'Passwords do not match';
                           return null;
                         },
                         decoration: InputDecoration(
-                          label: const Text('Confirm Password'),
-                          hintText: 'Confirm your password',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(10),
+                          labelText: 'Confirm Password',
+                          hintText: '••••••••',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirm
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              size: 18,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscureConfirm = !_obscureConfirm),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: agreeToPrivacyPolicy,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                if (value != null) {
-                                  agreeToPrivacyPolicy = value;
-                                }
-                              });
-                            },
-                            activeColor: lightColorScheme.primary,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PrivacyPolicyScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              'I agree to the Privacy Policy',
-                              style: TextStyle(
-                                color: lightColorScheme.primary,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20.0),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (_formSignupKey.currentState!.validate() &&
-                                agreeToPrivacyPolicy) {
-                              
-                              final user = await _auth.createUserWithEmailAndPassword(
-                                _emailController.text, 
-                                _passwordController.text
-                              );
+                      const SizedBox(height: 16),
 
-                              if (user != null && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Sign-up successful!')),
-                                );
-                                Navigator.of(context).popUntil((route) => route.isFirst);
-                              } else if (context.mounted) {
-                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Sign-up failed. Email may be in use.')),
-                                );
-                              }
-                            } else if (!agreeToPrivacyPolicy) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Please agree to the Privacy Policy')),
-                              );
-                            }
-                          },
-                          child: const Text('Sign Up'),
-                        ),
-                      ),
-                      const SizedBox(height: 25.0),
-                      const Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              thickness: 0.5,
-                              color: Colors.black45,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Text(
-                              'Or continue with',
-                              style: TextStyle(color: Colors.black45),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              thickness: 0.5,
-                              color: Colors.black45,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20.0),
+                      // Privacy Policy
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.black12),
-                            ),
-                            child: IconButton(
-                              onPressed: () async {
-                                final user = await _auth.signInWithGoogle();
-                                if (user != null && context.mounted) {
-                                  Navigator.of(context).popUntil((route) => route.isFirst);
-                                }
-                              },
-                              icon: Icon(Bootstrap.google, size: 25, color: Colors.blue),
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(
+                              value: _agreeToPolicy,
+                              onChanged: (v) =>
+                                  setState(() => _agreeToPolicy = v ?? false),
+                              activeColor: KColors.primary,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4)),
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 20.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Already have an account? ',
-                            style: TextStyle(color: Colors.black45),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (e) => const SignInScreen(),
+                                    builder: (_) => const PrivacyPolicyScreen()),
+                              ),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'I agree to the ',
+                                      style: context.kBodySM,
+                                    ),
+                                    TextSpan(
+                                      text: 'Privacy Policy',
+                                      style: KTextStyles.bodySM(color: KColors.primary)
+                                          .copyWith(
+                                              decoration: TextDecoration.underline),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
-                            child: Text(
-                              'Sign In',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: lightColorScheme.primary,
                               ),
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 22),
+
+                      // Sign Up Button
+                      GestureDetector(
+                        onTap: _isLoading ? null : _signUp,
+                        child: Container(
+                          height: context.kButtonHeight,
+                          decoration: KDecorations.gradientButton(radius: 14),
+                          child: Center(
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text('CREATE ACCOUNT', style: KTextStyles.button()),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Divider
+                      Row(
+                        children: [
+                          Expanded(
+                              child: Divider(
+                                  color: isDark
+                                      ? Colors.white12
+                                      : KColors.lightOutlineVariant)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('or', style: context.kBodySM),
+                          ),
+                          Expanded(
+                              child: Divider(
+                                  color: isDark
+                                      ? Colors.white12
+                                      : KColors.lightOutlineVariant)),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Google
+                      GestureDetector(
+                        onTap: _isLoading ? null : _googleSignIn,
+                        child: Container(
+                          height: 48,
+                          decoration: isDark
+                              ? KDecorations.ghostButtonDark(radius: 12)
+                              : KDecorations.ghostButtonLight(radius: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Bootstrap.google, size: 18, color: KColors.primary),
+                              const SizedBox(width: 10),
+                              Text('Continue with Google',
+                                  style: KTextStyles.button(color: KColors.primary)
+                                      .copyWith(fontSize: 14)),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
+              const SizedBox(height: 24),
+
+              // Sign in link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Already have an account? ', style: context.kBodySM),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignInScreen()),
+                    ),
+                    child: Text(
+                      'Sign In',
+                      style: KTextStyles.bodySM(color: KColors.primary)
+                          .copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

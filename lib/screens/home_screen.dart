@@ -2,15 +2,19 @@ import 'package:converter_app/screens/compress_image_screen.dart';
 import 'package:converter_app/screens/convert_screen.dart';
 import 'package:converter_app/screens/history_screen.dart';
 import 'package:converter_app/screens/settings_screen.dart';
-import 'package:converter_app/screens/self_hosting_screen.dart';
 import 'package:converter_app/screens/signin_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:converter_app/services/auth_service.dart';
+import 'package:converter_app/services/history_service.dart';
 import 'package:converter_app/services/update_service.dart';
+import 'package:converter_app/theme/app_colors.dart';
+import 'package:converter_app/theme/app_text_styles.dart';
+import 'package:converter_app/theme/responsive.dart';
+import 'package:converter_app/widgets/konvert_bottom_nav.dart';
+import 'package:converter_app/widgets/konvert_top_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:converter_app/main.dart';
-
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:converter_app/main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,251 +24,532 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
   @override
   void initState() {
-     super.initState();
-     _requestPermissions();
-     UpdateService().checkForUpdate(context);
+    super.initState();
+    _requestPermissions();
+    UpdateService().checkForUpdate(context);
   }
 
   Future<void> _requestPermissions() async {
-    // For Android 11+ (API 30+)
     if (await Permission.manageExternalStorage.isDenied) {
       await Permission.manageExternalStorage.request();
     }
-    
-    // For older Android versions or if manage storage is not applicable
     if (await Permission.storage.isDenied) {
       await Permission.storage.request();
     }
   }
+
+  // IndexedStack keeps all tabs alive (no rebuild on switch)
+  static const List<Widget> _tabs = [
+    _DashboardTab(),
+    HistoryScreen(),
+    _ToolsTab(),
+    SettingsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Konvert Dashboard'),
-        actions: [
-          IconButton(
-            icon: Icon(themeNotifier.value == ThemeMode.light ? Icons.dark_mode : Icons.light_mode),
-            onPressed: () {
-              if (themeNotifier.value == ThemeMode.light) {
-                themeNotifier.value = ThemeMode.dark;
-              } else {
-                themeNotifier.value = ThemeMode.light;
-              }
-            },
+      backgroundColor: context.scaffoldBg,
+      extendBody: true,
+      appBar: KonvertTopBar(
+        displayName: user?.displayName,
+        photoUrl: user?.photoURL,
+        trailingAction: _currentIndex == 0
+            ? ValueListenableBuilder<ThemeMode>(
+                valueListenable: themeNotifier,
+                builder: (_, mode, ctx) => IconButton(
+                  icon: Icon(
+                    mode == ThemeMode.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                    color: KColors.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    themeNotifier.value = themeNotifier.value == ThemeMode.light
+                        ? ThemeMode.dark
+                        : ThemeMode.light;
+                  },
+                ),
+              )
+            : null,
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _tabs,
+      ),
+      bottomNavigationBar: KonvertBottomNav(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+      ),
+    );
+  }
+}
+
+// ─── Dashboard Tab ────────────────────────────────────────────────────────────
+
+class _DashboardTab extends StatefulWidget {
+  const _DashboardTab();
+
+  @override
+  State<_DashboardTab> createState() => _DashboardTabState();
+}
+
+class _DashboardTabState extends State<_DashboardTab> {
+  List<Map<String, dynamic>> _recentHistory = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecent();
+  }
+
+  Future<void> _loadRecent() async {
+    final all = await HistoryService().getHistory();
+    if (mounted) {
+      setState(() {
+        _recentHistory = all.take(3).toList();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final name = user?.displayName?.split(' ').first ?? 'there';
+
+    return RefreshIndicator(
+      color: KColors.primary,
+      onRefresh: _loadRecent,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: context.kPagePaddingTop(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Greeting ──
+            Text(
+              'Hello, $name 👋',
+              style: context.kHeadlineXL,
+            ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, curve: Curves.easeOut),
+            const SizedBox(height: 4),
+            Text(
+              'What do you want to convert today?',
+              style: context.kBodySM,
+            ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+            const SizedBox(height: 24),
+
+            // ── Featured Tools ──
+            Text(
+              'FEATURED TOOLS',
+              style: context.kLabelCaps,
+            ).animate().fadeIn(delay: 150.ms),
+            const SizedBox(height: 12),
+
+            // Phone: 2 side-by-side  |  Tablet: 3 side-by-side
+            LayoutBuilder(builder: (context, constraints) {
+              final count = context.isWideScreen ? 3 : 2;
+              final spacing = 12.0;
+              final cardWidth =
+                  (constraints.maxWidth - spacing * (count - 1)) / count;
+              return Row(
+                children: [
+                  SizedBox(
+                    width: cardWidth,
+                    child: _FeaturedCard(
+                      title: 'Images → PDF',
+                      subtitle: '100% Offline',
+                      icon: Icons.image_outlined,
+                      badgeText: 'OFFLINE',
+                      badgeColor: KColors.success,
+                      onTap: () => _navigate(context, ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'])),
+                    ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.1),
+                  ),
+                  SizedBox(width: spacing),
+                  SizedBox(
+                    width: cardWidth,
+                    child: _FeaturedCard(
+                      title: 'Compress Image',
+                      subtitle: 'Shrink any image fast',
+                      icon: Icons.compress_outlined,
+                      onTap: () => _navigate(context, const CompressImageScreen()),
+                    ).animate().fadeIn(delay: 280.ms).slideX(begin: 0.1),
+                  ),
+                  if (context.isWideScreen) ...[
+                    SizedBox(width: spacing),
+                    SizedBox(
+                      width: cardWidth,
+                      child: _FeaturedCard(
+                        title: 'Docs → PDF',
+                        subtitle: 'TXT, RTF, HTML, ODT',
+                        icon: Icons.article_outlined,
+                        onTap: () => _navigate(context, ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['txt', 'rtf', 'html', 'odt'])),
+                      ).animate().fadeIn(delay: 350.ms).slideX(begin: 0.1),
+                    ),
+                  ],
+                ],
+              );
+            }),
+            const SizedBox(height: 24),
+
+            // ── All Conversion Tools ──
+            Text(
+              'ALL CONVERSION TOOLS',
+              style: context.kLabelCaps,
+            ).animate().fadeIn(delay: 320.ms),
+            const SizedBox(height: 12),
+
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: context.gridCount,  // 2 phone / 3 tablet / 4 large
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: context.toolCardRatio,
+              children: [
+                _ToolCard(
+                  title: 'Images → PDF',
+                  subtitle: 'JPG, PNG, WEBP, HEIC',
+                  icon: Icons.image_outlined,
+                  delay: 360,
+                  onTap: () => _navigate(context,
+                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'])),
+                ),
+                _ToolCard(
+                  title: 'Word → PDF',
+                  subtitle: 'DOC, DOCX',
+                  icon: Icons.description_outlined,
+                  delay: 400,
+                  onTap: () => _navigate(context,
+                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['doc', 'docx'])),
+                ),
+                _ToolCard(
+                  title: 'Excel → PDF',
+                  subtitle: 'XLS, XLSX',
+                  icon: Icons.table_chart_outlined,
+                  delay: 440,
+                  onTap: () => _navigate(context,
+                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['xls', 'xlsx'])),
+                ),
+                _ToolCard(
+                  title: 'PPT → PDF',
+                  subtitle: 'PPT, PPTX',
+                  icon: Icons.slideshow_outlined,
+                  delay: 480,
+                  onTap: () => _navigate(context,
+                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['ppt', 'pptx'])),
+                ),
+                _ToolCard(
+                  title: 'Docs → PDF',
+                  subtitle: 'TXT, RTF, HTML, ODT',
+                  icon: Icons.article_outlined,
+                  delay: 520,
+                  onTap: () => _navigate(context,
+                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['txt', 'rtf', 'html', 'odt'])),
+                ),
+                _ToolCard(
+                  title: 'Compress',
+                  subtitle: 'JPG, PNG — Quality or Size',
+                  icon: Icons.compress_outlined,
+                  delay: 560,
+                  onTap: () => _navigate(context, const CompressImageScreen()),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // ── Recent Conversions ──
+            if (_recentHistory.isNotEmpty) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('RECENT CONVERSIONS', style: context.kLabelCaps),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      'View All →',
+                      style: KTextStyles.bodySM(color: KColors.primary),
+                    ),
+                  ),
+                ],
+              ).animate().fadeIn(delay: 600.ms),
+              const SizedBox(height: 8),
+              ...List.generate(_recentHistory.length, (i) {
+                final item = _recentHistory[i];
+                return _HistoryItem(item: item)
+                    .animate()
+                    .fadeIn(delay: Duration(milliseconds: 640 + i * 60))
+                    .slideY(begin: 0.1);
+              }),
+            ],
+
+            // ── Guest sign-in nudge ──
+            if (FirebaseAuth.instance.currentUser == null) ...[
+              const SizedBox(height: 24),
+              _SignInNudge().animate().fadeIn(delay: 700.ms),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigate(BuildContext context, Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
+}
+
+// ─── Tools Tab (convert picker) ───────────────────────────────────────────────
+
+class _ToolsTab extends StatelessWidget {
+  const _ToolsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    // Opens Convert screen directly from the Tools tab
+    return const ConvertScreen(initialFormat: 'pdf');
+  }
+}
+
+// ─── Reusable Widgets ─────────────────────────────────────────────────────────
+
+class _FeaturedCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final String? badgeText;
+  final Color? badgeColor;
+  final VoidCallback onTap;
+
+  const _FeaturedCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+    this.badgeText,
+    this.badgeColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: isDark
+            ? KDecorations.glassCard(
+                shadows: [
+                  BoxShadow(
+                    color: KColors.primary.withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              )
+            : KDecorations.lightCard(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: KColors.primaryGradientVertical,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 18),
+                ),
+                if (badgeText != null) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (badgeColor ?? KColors.success).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      badgeText!,
+                      style: KTextStyles.labelCaps(
+                        color: badgeColor ?? KColors.success,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(title, style: context.kHeadlineSM),
+            const SizedBox(height: 2),
+            Text(subtitle, style: context.kLabelSM, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final int delay;
+  final VoidCallback onTap;
+
+  const _ToolCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.delay,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: isDark
+            ? KDecorations.glassCard()
+            : KDecorations.lightCard(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: KColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: KColors.primary, size: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(title,
+                style: KTextStyles.bodySM(
+                    color: isDark ? KColors.onSurface : KColors.lightOnSurface)
+                  ..copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 2),
+            Text(subtitle, style: context.kLabelSM, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
+        ),
+      ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideY(begin: 0.1),
+    );
+  }
+}
+
+class _HistoryItem extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const _HistoryItem({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final name = item['originalName'] as String? ?? 'Unknown';
+    final format = (item['targetFormat'] as String? ?? 'pdf').toUpperCase();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: isDark
+          ? KDecorations.glassCard(radius: 14)
+          : KDecorations.lightCard(radius: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: KColors.success.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.check_circle_outline, color: KColors.success, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: context.kBodySM.copyWith(
+                    color: isDark ? KColors.onSurface : KColors.lightOnSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text('→ $format', style: context.kLabelSM),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 12,
+            color: isDark ? KColors.onSurfaceVariant : KColors.lightOnSurfaceVariant,
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(user?.displayName ?? "Guest User"),
-              accountEmail: Text(user?.email ?? "Sign in to sync history"),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/final_logo.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              decoration: const BoxDecoration(
-                color: Colors.blueAccent,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('History'),
-              onTap: () {
-                Navigator.pop(context); // Close drawer
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.cloud_download),
-              title: const Text('Self-Hosting Backend'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const SelfHostingScreen()));
-              },
-            ),
-            const Divider(),
-            if (user == null)
-              ListTile(
-                leading: const Icon(Icons.login),
-                title: const Text('Sign In'),
-                onTap: () {
-                   Navigator.pop(context);
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => const SignInScreen()));
-                },
-              )
-            else
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Logout'),
-                onTap: () async {
-                  await AuthService().signOut();
-                  if (context.mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (context) => const SignInScreen()),
-                        (Route<dynamic> route) => false);
-                  }
-                },
-              ),
+    );
+  }
+}
+
+class _SignInNudge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            KColors.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+            KColors.secondary.withValues(alpha: isDark ? 0.10 : 0.05),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: KColors.primary.withValues(alpha: 0.20),
         ),
       ),
-      body: Container(
-        height: double.infinity,
-        padding: const EdgeInsets.all(15.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-             const Text(
-              "Convert File",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      child: Row(
+        children: [
+          Icon(Icons.account_circle_outlined, color: KColors.primary, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Sign in to sync history', style: context.kHeadlineSM.copyWith(fontSize: 14)),
+                Text('Your conversions are saved locally.', style: context.kBodySM),
+              ],
             ),
-            const SizedBox(height: 20),
-            
-            // CONVERSION GRID
-            GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                childAspectRatio: 0.75,
-                children: [
-                   _buildGridCard(context, "Images to PDF", "JPG, PNG, WEBP, HEIC", Icons.image, Colors.purple, 'pdf', ['jpg', 'jpeg', 'png', 'webp', 'heic'], 100),
-                   _buildGridCard(context, "Word to PDF", "DOC, DOCX", Icons.description, Colors.blue, 'pdf', ['doc', 'docx'], 200),
-                   _buildGridCard(context, "Excel to PDF", "XLS, XLSX", Icons.table_chart, Colors.green, 'pdf', ['xls', 'xlsx'], 300),
-                   _buildGridCard(context, "PPT to PDF", "PPT, PPTX", Icons.slideshow, Colors.orange, 'pdf', ['ppt', 'pptx'], 400),
-                   _buildGridCard(context, "Docs to PDF", "TXT, RTF, HTML", Icons.article, Colors.teal, 'pdf', ['txt', 'rtf', 'html', 'odt'], 500),
-                ],
-            ),
-            const SizedBox(height: 30),
-
-            const Text(
-              "Compression Tools",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            
-            const SizedBox(height: 20),
-            
-            GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                childAspectRatio: 0.75,
-                children: [
-                   _buildCompressionCard(context, "Compress Image", "Reduce size (JPG, PNG)", Icons.compress, Colors.pink, 100),
-                   // Placeholder for Docs
-                   _buildCompressionCard(context, "Shrink Docs", "Coming Soon (PDF)", Icons.picture_as_pdf, Colors.blueGrey, 200, onTap: () {
-                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Document Compression coming next!")));
-                   }),
-                ],
-              ),
-            ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGridCard(BuildContext context, String title, String subtitle, IconData icon, Color color, String format, List<String> extensions, int delay) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => ConvertScreen(initialFormat: format, allowedExtensions: extensions)));
-      },
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 28),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SignInScreen()),
             ),
-            const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-            const SizedBox(height: 4),
-            Text(
-              subtitle, 
-              style: TextStyle(fontSize: 10, color: Colors.grey[700]), 
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: KDecorations.gradientButton(radius: 10),
+              child: Text('Sign In', style: KTextStyles.button()),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompressionCard(BuildContext context, String title, String subtitle, IconData icon, Color color, int delay, {VoidCallback? onTap}) {
-    return InkWell(
-      onTap: onTap ?? () {
-        if (title == "Compress Image") {
-           Navigator.push(context, MaterialPageRoute(builder: (_) => const CompressImageScreen()));
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-            const SizedBox(height: 4),
-            Text(
-              subtitle, 
-              style: TextStyle(fontSize: 10, color: Colors.grey[700]), 
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

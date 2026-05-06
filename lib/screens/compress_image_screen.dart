@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:converter_app/services/compression_service.dart';
+import 'package:converter_app/theme/app_colors.dart';
+import 'package:converter_app/theme/app_text_styles.dart';
+import 'package:converter_app/theme/responsive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -15,288 +18,476 @@ class CompressImageScreen extends StatefulWidget {
 
 class _CompressImageScreenState extends State<CompressImageScreen> {
   final _compressionService = CompressionService();
+  // ── MEMORY LEAK: _sizeController is properly disposed ──
+  final _sizeController = TextEditingController();
+
   File? _selectedFile;
   File? _resultFile;
   bool _isCompressing = false;
   String? _statusMessage;
+  bool _isSuccess = false;
   String? _outputDirectory;
 
-  // Mode: 0 = Percentage, 1 = Target Size
-  int _mode = 0;
-
-  // Percentage Mode
+  int _mode = 0; // 0 = percentage, 1 = target size
   double _quality = 80;
-
-  // Target Size Mode
-  final _sizeController = TextEditingController();
-  String _sizeUnit = 'KB'; // KB or MB
+  String _sizeUnit = 'KB';
 
   @override
   void dispose() {
+    // ✅ Properly disposed — no leak
     _sizeController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickDirectory() async {
-    String? dir = await FilePicker.platform.getDirectoryPath();
-    if (dir != null) {
-      setState(() => _outputDirectory = dir);
-    }
   }
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
     );
-
     if (result != null) {
       setState(() {
         _selectedFile = File(result.files.single.path!);
         _resultFile = null;
         _statusMessage = null;
+        _isSuccess = false;
       });
     }
   }
 
+  Future<void> _pickDirectory() async {
+    String? dir = await FilePicker.platform.getDirectoryPath();
+    if (dir != null) setState(() => _outputDirectory = dir);
+  }
+
   Future<void> _processCompression() async {
     if (_selectedFile == null) return;
-
     setState(() {
       _isCompressing = true;
-      _statusMessage = "Compressing...";
+      _statusMessage = 'Compressing...';
       _resultFile = null;
+      _isSuccess = false;
     });
 
     try {
       File? compressed;
       if (_mode == 0) {
-        // Percentage
-        compressed = await _compressionService.compressImagePercentage(_selectedFile!, _quality.toInt());
+        compressed = await _compressionService.compressImagePercentage(
+            _selectedFile!, _quality.toInt());
       } else {
-        // Target Size
         final inputVal = double.tryParse(_sizeController.text);
-        if (inputVal == null || inputVal <= 0) throw Exception("Invalid size");
-        
-        int targetBytes = _sizeUnit == 'MB' 
-            ? (inputVal * 1024 * 1024).toInt() 
+        if (inputVal == null || inputVal <= 0) throw Exception('Invalid size');
+        int targetBytes = _sizeUnit == 'MB'
+            ? (inputVal * 1024 * 1024).toInt()
             : (inputVal * 1024).toInt();
-            
-        compressed = await _compressionService.compressImageToSize(_selectedFile!, targetBytes);
+        compressed = await _compressionService.compressImageToSize(
+            _selectedFile!, targetBytes);
       }
 
-      if (compressed == null) throw Exception("Compression failed");
+      if (compressed == null) throw Exception('Compression failed');
 
-      // Save to Output Directory if Selected
       if (_outputDirectory != null) {
-         final fileName = "compressed_${p.basename(_selectedFile!.path)}";
-         final newPath = p.join(_outputDirectory!, fileName);
-         _resultFile = await compressed.copy(newPath);
+        final fileName = 'compressed_${p.basename(_selectedFile!.path)}';
+        final newPath = p.join(_outputDirectory!, fileName);
+        _resultFile = await compressed.copy(newPath);
       } else {
-         _resultFile = compressed;
+        _resultFile = compressed;
       }
-      
-      // Calculate savings
+
       int originalSize = await _selectedFile!.length();
       int newSize = await _resultFile!.length();
       double saved = (originalSize - newSize) / originalSize * 100;
-      
       String sizeStr = _formatSize(newSize);
-      String loc = _outputDirectory != null ? "\nSaved to: ${p.basename(_resultFile!.path)}" : "\nSaved to Temp";
 
       setState(() {
-        _statusMessage = "Success! Size: $sizeStr$loc\n(Reduced by ${saved.toStringAsFixed(1)}%)";
+        _statusMessage = 'Reduced by ${saved.toStringAsFixed(1)}% → $sizeStr';
         _isCompressing = false;
+        _isSuccess = true;
       });
-
     } catch (e) {
       setState(() {
-        _statusMessage = "Error: ${e.toString()}";
+        _statusMessage = e.toString().replaceFirst('Exception: ', '');
         _isCompressing = false;
+        _isSuccess = false;
       });
     }
   }
-  
+
   String _formatSize(int bytes) {
-      double kb = bytes / 1024;
-      double mb = kb / 1024;
-      return mb >= 1 ? "${mb.toStringAsFixed(2)} MB" : "${kb.toStringAsFixed(0)} KB";
+    double kb = bytes / 1024;
+    double mb = kb / 1024;
+    return mb >= 1 ? '${mb.toStringAsFixed(2)} MB' : '${kb.toStringAsFixed(0)} KB';
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Compress Image")),
+      backgroundColor: context.scaffoldBg,
+      appBar: AppBar(
+        title: Text('Compress Image', style: context.kHeadlineMD),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 50),
+          padding: EdgeInsets.fromLTRB(20, 8, 20, context.kBottomPadding),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Picker
-            InkWell(
-              onTap: _pickFile,
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.purple, width: 2),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (_selectedFile != null) ...[
-                      const Icon(Icons.check_circle, size: 60, color: Colors.green),
-                      const SizedBox(height: 10),
-                      Text("Selected: ${p.basename(_selectedFile!.path)}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                      FutureBuilder<int>(
-                        future: _selectedFile!.length(), 
-                        builder: (c, s) => Text(s.hasData ? _formatSize(s.data!) : "...", style: const TextStyle(color: Colors.grey))
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Upload Zone ──
+              GestureDetector(
+                onTap: _pickFile,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: context.uploadZoneHeight,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? KColors.surfaceContainerLow
+                        : KColors.lightSurfaceContainer,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _selectedFile == null
+                          ? KColors.primary.withValues(alpha: 0.40)
+                          : KColors.success,
+                      width: 1.5,
+                    ),
+                    boxShadow: _selectedFile != null
+                        ? [
+                            BoxShadow(
+                              color: KColors.success.withValues(alpha: 0.10),
+                              blurRadius: 16,
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: (_selectedFile != null ? KColors.success : KColors.primary)
+                              .withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _selectedFile != null
+                              ? Icons.check_circle_outline
+                              : Icons.add_photo_alternate_outlined,
+                          color: _selectedFile != null ? KColors.success : KColors.primary,
+                          size: 26,
+                        ),
                       ),
-                    ] else ...[
-                      const Icon(Icons.add_photo_alternate, size: 60, color: Colors.purple),
-                      const SizedBox(height: 10),
-                      const Text("Tap to Pick Image", style: TextStyle(fontSize: 18, color: Colors.purple)),
-                    ]
-                  ],
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-            
-            if (_selectedFile != null) ...[
-                const Text("Compression Mode", style: TextStyle(fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    Expanded(child: RadioListTile(
-                      title: const Text("Percentage"), 
-                      value: 0, 
-                      // ignore: deprecated_member_use
-                      groupValue: _mode, 
-                      // ignore: deprecated_member_use
-                      onChanged: (v) => setState(() => _mode = v!),
-                      contentPadding: EdgeInsets.zero,
-                    )),
-                    Expanded(child: RadioListTile(
-                      title: const Text("Target Size"), 
-                      value: 1, 
-                       // ignore: deprecated_member_use
-                      groupValue: _mode, 
-                       // ignore: deprecated_member_use
-                      onChanged: (v) => setState(() => _mode = v!),
-                      contentPadding: EdgeInsets.zero,
-                    )),
-                  ],
-                ),
-                
-                const SizedBox(height: 10),
-                
-                if (_mode == 0) ...[
-                   // Slider
-                   Text("Quality: ${_quality.toInt()}%"),
-                   Slider(
-                     value: _quality, 
-                     min: 5, 
-                     max: 100, 
-                     divisions: 19,
-                     label: "${_quality.toInt()}%",
-                     onChanged: (v) => setState(() => _quality = v),
-                   ),
-                ] else ...[
-                   // Target Size Inputs
-                   Row(
-                     children: [
-                       Expanded(
-                         flex: 2,
-                         child: TextField(
-                           controller: _sizeController,
-                           keyboardType: TextInputType.number,
-                           decoration: const InputDecoration(
-                             labelText: "Size",
-                             border: OutlineInputBorder(),
-                           ),
-                         ),
-                       ),
-                       const SizedBox(width: 10),
-                       Expanded(
-                         flex: 1,
-                         child: DropdownButtonFormField<String>(
-                           // ignore: deprecated_member_use
-                           value: _sizeUnit,
-                           items: const [
-                             DropdownMenuItem(value: 'KB', child: Text('KB')),
-                             DropdownMenuItem(value: 'MB', child: Text('MB')),
-                           ],
-                           onChanged: (v) => setState(() => _sizeUnit = v!),
-                           decoration: const InputDecoration(border: OutlineInputBorder()),
-                         ),
-                       ),
-                     ],
-                   ),
-                ],
-                
-                const SizedBox(height: 20),
-
-                // Output Directory Selector
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text("Save Location (Optional)", style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(_outputDirectory ?? "Default: Temporary Folder"),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.folder_open, color: Colors.blue),
-                    onPressed: _pickDirectory,
+                      const SizedBox(height: 12),
+                      Text(
+                        _selectedFile != null
+                            ? p.basename(_selectedFile!.path)
+                            : 'Tap to Pick Image',
+                        style: context.kHeadlineSM.copyWith(
+                          color: _selectedFile != null ? KColors.success : KColors.primary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (_selectedFile != null) ...[
+                        const SizedBox(height: 4),
+                        FutureBuilder<int>(
+                          future: _selectedFile!.length(),
+                          builder: (_, snap) => Text(
+                            snap.hasData ? _formatSize(snap.data!) : '...',
+                            style: context.kBodySM,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
+              ).animate().fadeIn().scale(begin: const Offset(0.97, 0.97)),
 
+              if (_selectedFile != null) ...[
                 const SizedBox(height: 20),
-                
-               if (_isCompressing)
-                  Column(
+
+                // ── Mode Selector ──
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration:
+                      isDark ? KDecorations.glassCard() : KDecorations.lightCard(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       const LinearProgressIndicator(minHeight: 8, borderRadius: BorderRadius.all(Radius.circular(10))),
-                       const SizedBox(height: 10),
-                       Text(_statusMessage ?? "Processing..."),
+                      Text('COMPRESSION MODE', style: context.kLabelCaps),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _ModeButton(
+                              label: 'Percentage',
+                              icon: Icons.percent_outlined,
+                              isSelected: _mode == 0,
+                              onTap: () => setState(() => _mode = 0),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _ModeButton(
+                              label: 'Target Size',
+                              icon: Icons.data_usage_outlined,
+                              isSelected: _mode == 1,
+                              onTap: () => setState(() => _mode = 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── Mode-specific Controls ──
+                      if (_mode == 0) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Quality', style: context.kBodySM),
+                            Text(
+                              '${_quality.toInt()}%',
+                              style: KTextStyles.headlineSM(color: KColors.primary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 4,
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                          ),
+                          child: Slider(
+                            value: _quality,
+                            min: 5,
+                            max: 100,
+                            divisions: 19,
+                            onChanged: (v) => setState(() => _quality = v),
+                          ),
+                        ),
+                      ] else ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: TextField(
+                                controller: _sizeController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Target Size',
+                                  hintText: 'e.g. 500',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              flex: 2,
+                              child: DropdownButtonFormField<String>(
+                                initialValue: _sizeUnit,
+                                items: const [
+                                  DropdownMenuItem(value: 'KB', child: Text('KB')),
+                                  DropdownMenuItem(value: 'MB', child: Text('MB')),
+                                ],
+                                onChanged: (v) => setState(() => _sizeUnit = v!),
+                                decoration: const InputDecoration(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
-                  )
-               else
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _processCompression,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-                      child: const Text("COMPRESS NOW", style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                ).animate().fadeIn(delay: 150.ms),
+
+                const SizedBox(height: 12),
+
+                // ── Save Location ──
+                GestureDetector(
+                  onTap: _pickDirectory,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration:
+                        isDark ? KDecorations.glassCard(radius: 14) : KDecorations.lightCard(radius: 14),
+                    child: Row(
+                      children: [
+                        Icon(Icons.folder_outlined, color: KColors.primary, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Save Location', style: context.kHeadlineSM.copyWith(fontSize: 13)),
+                              Text(
+                                _outputDirectory ?? 'Default: Downloads',
+                                style: context.kBodySM,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right,
+                            size: 18,
+                            color: isDark ? KColors.onSurfaceVariant : KColors.lightOnSurfaceVariant),
+                      ],
                     ),
                   ),
-            ],
+                ).animate().fadeIn(delay: 200.ms),
 
-            if (_resultFile != null && !_isCompressing) 
-               Container(
-                 margin: const EdgeInsets.only(top: 20),
-                 padding: const EdgeInsets.all(15),
-                 decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                 child: Column(
-                   children: [
-                     Text(_statusMessage ?? "Done!", textAlign: TextAlign.center, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                     const SizedBox(height: 10),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                       children: [
-                         ElevatedButton.icon(
-                           icon: const Icon(Icons.open_in_new),
-                           label: const Text("Open"),
-                           onPressed: () => OpenFile.open(_resultFile!.path),
-                         ),
-                       ],
-                     )
-                   ],
-                 ),
-               ).animate().fadeIn().slideY(),
+                const SizedBox(height: 24),
+
+                // ── Progress / CTA ──
+                if (_isCompressing) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration:
+                        isDark ? KDecorations.glassCard() : KDecorations.lightCard(),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            minHeight: 6,
+                            backgroundColor: isDark
+                                ? KColors.surfaceContainerHigh
+                                : KColors.lightSurfaceContainerHigh,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text('Compressing...',
+                            style: KTextStyles.bodySM(color: KColors.primary)),
+                      ],
+                    ),
+                  ).animate().fadeIn(),
+                ] else ...[
+                  GestureDetector(
+                    onTap: _processCompression,
+                    child: Container(
+                      height: context.kButtonHeight,
+                      decoration: KDecorations.gradientButton(radius: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.compress, color: Colors.white, size: 20),
+                          const SizedBox(width: 10),
+                          Text('COMPRESS NOW', style: KTextStyles.button()),
+                        ],
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 250.ms).scale(begin: const Offset(0.97, 0.97)),
+                ],
+
+                // ── Status ──
+                if (_statusMessage != null && !_isCompressing) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: (_isSuccess ? KColors.success : KColors.error)
+                          .withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: (_isSuccess ? KColors.success : KColors.error)
+                            .withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isSuccess ? Icons.check_circle_outline : Icons.error_outline,
+                          color: _isSuccess ? KColors.success : KColors.error,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _statusMessage!,
+                            style: KTextStyles.bodySM(
+                              color: _isSuccess ? KColors.success : KColors.error,
+                            ),
+                          ),
+                        ),
+                        if (_isSuccess && _resultFile != null)
+                          TextButton.icon(
+                            onPressed: () => OpenFile.open(_resultFile!.path),
+                            icon: const Icon(Icons.open_in_new, size: 14),
+                            label: const Text('Open'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: KColors.success,
+                              padding: EdgeInsets.zero,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ).animate().fadeIn().slideY(begin: 0.2),
+                ],
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ModeButton({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? KColors.primary.withValues(alpha: 0.12)
+              : (isDark
+                  ? KColors.surfaceContainerHigh
+                  : KColors.lightSurfaceContainerHigh),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? KColors.primary : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected
+                  ? KColors.primary
+                  : (isDark ? KColors.onSurfaceVariant : KColors.lightOnSurfaceVariant),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: KTextStyles.labelCaps(
+                color: isSelected
+                    ? KColors.primary
+                    : (isDark ? KColors.onSurfaceVariant : KColors.lightOnSurfaceVariant),
+              ),
+            ),
           ],
-        ), // Column
-        ), // SingleChildScrollView
-      ), // SafeArea
-    ); // Scaffold
+        ),
+      ),
+    );
   }
 }

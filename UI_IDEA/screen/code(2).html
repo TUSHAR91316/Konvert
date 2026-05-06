@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Library - Konvert</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface-container-low": "#131b2e",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary-fixed-dim": "#cebdff",
+                        "on-secondary": "#1000a9",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-primary": "#3c0091",
+                        "on-tertiary-container": "#31057e",
+                        "on-error": "#690005",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#4f319c",
+                        "on-secondary-fixed": "#07006c",
+                        "primary-fixed-dim": "#d0bcff",
+                        "background": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#b0b2ff",
+                        "surface": "#0b1326",
+                        "secondary-container": "#3131c0",
+                        "tertiary": "#cebdff",
+                        "inverse-surface": "#dae2fd",
+                        "surface-container": "#171f33",
+                        "primary": "#d0bcff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary": "#381385",
+                        "surface-bright": "#31394d",
+                        "inverse-primary": "#6d3bd7",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c0c1ff",
+                        "on-primary-fixed": "#23005c",
+                        "primary-container": "#a078ff",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-container": "#9b7fed",
+                        "on-primary-container": "#340080",
+                        "surface-variant": "#2d3449",
+                        "tertiary-fixed": "#e8ddff",
+                        "secondary-fixed-dim": "#c0c1ff",
+                        "surface-container-highest": "#2d3449",
+                        "secondary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#283044",
+                        "outline-variant": "#494454",
+                        "error-container": "#93000a",
+                        "outline": "#958ea0",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-fixed": "#21005e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "bento-gutter": "16px",
+                        "base": "8px",
+                        "element-gap": "12px",
+                        "section-margin": "32px",
+                        "container-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-xl": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .fab-glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-lg min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-slate-950/40 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:bg-white/5 transition-colors rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+<h1 class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500 font-inter">Konvert</h1>
+</div>
+<div class="flex items-center">
+<div class="w-9 h-9 rounded-full overflow-hidden border border-violet-500/30">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional high-resolution close-up portrait of a user profile avatar with soft cinematic lighting. The character has a neutral yet confident expression, styled in a modern, tech-focused aesthetic that blends seamlessly with a dark, violet-infused digital environment. The background features subtle bokeh light circles in electric violet and deep indigo, emphasizing the precision and premium quality of the interface." src="https://lh3.googleusercontent.com/aida/ADBb0uiyW68XCCuc-UfmATF7dOsB7t_QHxYLOM6A_--S9L6cWXHqWtojk7CsvXna1Fjr3BK_5qUw3k6lOfsT6Nuc-XUJKyT-rkEI58dE0HV0bOsw7m2fkmbnI_7EzLH4ZUBPZJj__mAL1a74YEKeyjSp5WcETxvlGjqIhOAxwCZjPJK51Q9km-sOnLkYisOHNYAJoyT-DK5WVJbLMJ5reFnjv0agA0NxNTIt3Jpq6nosKFArkAC-Z6DnoERzrA"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-container-padding max-w-4xl mx-auto space-y-section-margin">
+<!-- Search & Filter Bento Header -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-bento-gutter">
+<div class="md:col-span-3 glass-card rounded-xl p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-lg w-full placeholder:text-slate-500" placeholder="Search your converted files..." type="text"/>
+</div>
+<div class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 cursor-pointer hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-violet-400" data-icon="filter_list">filter_list</span>
+<span class="font-label-caps text-label-caps text-on-surface">Filter</span>
+</div>
+</div>
+<!-- Today Section -->
+<section class="space-y-4">
+<h2 class="font-label-caps text-label-caps text-slate-500 tracking-widest pl-2">TODAY</h2>
+<div class="grid grid-cols-1 gap-3">
+<!-- File Item 1 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4 group hover:border-violet-500/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
+<span class="material-symbols-outlined text-3xl" data-icon="description">description</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md truncate">financial_report_q3.pdf</h3>
+<p class="text-body-sm text-slate-500">4.2 MB • PDF Document</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- File Item 2 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4 group hover:border-violet-500/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+<span class="material-symbols-outlined text-3xl" data-icon="image">image</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md truncate">hero_banner_final.png</h3>
+<p class="text-body-sm text-slate-500">12.8 MB • PNG Image</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Yesterday Section -->
+<section class="space-y-4">
+<h2 class="font-label-caps text-label-caps text-slate-500 tracking-widest pl-2">YESTERDAY</h2>
+<div class="grid grid-cols-1 gap-3">
+<!-- File Item 3 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4 group hover:border-violet-500/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+<span class="material-symbols-outlined text-3xl" data-icon="table_chart">table_chart</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md truncate">user_database_export.csv</h3>
+<p class="text-body-sm text-slate-500">1.1 MB • CSV Sheet</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Last Week Section -->
+<section class="space-y-4">
+<h2 class="font-label-caps text-label-caps text-slate-500 tracking-widest pl-2">LAST WEEK</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-bento-gutter">
+<!-- File Item 4 (Compact Grid Style) -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4 group hover:border-violet-500/30 transition-all">
+<div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400">
+<span class="material-symbols-outlined text-2xl" data-icon="picture_as_pdf">picture_as_pdf</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-body-lg text-body-lg truncate">contract_v2.pdf</h4>
+<p class="text-body-sm text-slate-500">850 KB</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- File Item 5 -->
+<div class="glass-card rounded-xl p-4 flex items-center gap-4 group hover:border-violet-500/30 transition-all">
+<div class="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400">
+<span class="material-symbols-outlined text-2xl" data-icon="movie">movie</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-body-lg text-body-lg truncate">intro_sequence.mp4</h4>
+<p class="text-body-sm text-slate-500">45.2 MB</p>
+</div>
+<button class="p-2 text-slate-400 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Bottom Graphic Bento Tile -->
+<div class="relative w-full h-48 rounded-2xl overflow-hidden glass-card">
+<img alt="Library Storage Visual" class="w-full h-full object-cover opacity-60 mix-blend-overlay" data-alt="A minimalist and technical architectural visualization of a data center corridor in the future. Rows of sleek, obsidian-colored server racks are lined with thin, glowing violet light strips. The floor is a reflective dark polished surface that mirrors the rhythmic purple illumination. The atmosphere is quiet, cold, and highly efficient, representing the immense storage and processing power of the Konvert library ecosystem." src="https://lh3.googleusercontent.com/aida/ADBb0uhR3tV6ROFV_XPpM22xQJLon7xFlzn35UpW42H2ZhWQ_xR_i78EDP6faSWCyPQlgye9HTyGR2FnGvNNwyrdhyt8OCxHQu7w26ku8YWgllNokXG2L2-RN7KFVXcPtgaQIoNBUz850QNB3dy3B7FghGQCVWQ6jGukPg8lyXzJatFogFD-qSVDJS3ox4XKJNidQzN_wZaAkgJpzppbplPbJ8J6lZM6Msk491SVcYl0t-9OEjWtCkO8CB5xcQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent flex items-end p-6">
+<div>
+<span class="font-label-caps text-label-caps text-violet-400">Storage Usage</span>
+<h3 class="font-headline-xl text-headline-xl">24.8 GB of 100 GB</h3>
+<div class="w-full h-1.5 bg-slate-800 rounded-full mt-3 overflow-hidden">
+<div class="w-[25%] h-full bg-gradient-to-r from-violet-500 to-indigo-500"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for quick upload -->
+<button class="fixed bottom-28 right-6 w-14 h-14 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg fab-glow active:scale-90 transition-transform z-[60]">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-slate-950/60 backdrop-blur-2xl border-t border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] rounded-t-2xl">
+<!-- Dashboard -->
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Dashboard</span>
+</a>
+<!-- Library (Active) -->
+<a class="flex flex-col items-center justify-center text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.5)] after:content-[''] after:w-1 after:h-1 after:bg-violet-500 after:rounded-full after:mt-1 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="folder_open" style="font-variation-settings: 'FILL' 1;">folder_open</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Library</span>
+</a>
+<!-- Tools -->
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="construction">construction</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Tools</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

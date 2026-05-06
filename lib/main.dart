@@ -31,6 +31,19 @@ class MyApp extends StatelessWidget {
           darkTheme: darkmode,
           themeMode: mode,
           home: const HomeScreen(),
+          // ── Global text scale guard ──
+          // Prevents system-level "large font" accessibility settings from
+          // overflowing fixed-height UI containers (buttons, cards, etc.).
+          // Caps at 1.2× so readability is still improved, just not broken.
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: MediaQuery.of(context).textScaler.clamp(
+                minScaleFactor: 0.85,
+                maxScaleFactor: 1.2,
+              ),
+            ),
+            child: child!,
+          ),
         );
       },
     );

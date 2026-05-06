@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Konvert - Images to PDF</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface-container-low": "#131b2e",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary-fixed-dim": "#cebdff",
+                        "on-secondary": "#1000a9",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-primary": "#3c0091",
+                        "on-tertiary-container": "#31057e",
+                        "on-error": "#690005",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#4f319c",
+                        "on-secondary-fixed": "#07006c",
+                        "primary-fixed-dim": "#d0bcff",
+                        "background": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#b0b2ff",
+                        "surface": "#0b1326",
+                        "secondary-container": "#3131c0",
+                        "tertiary": "#cebdff",
+                        "inverse-surface": "#dae2fd",
+                        "surface-container": "#171f33",
+                        "primary": "#d0bcff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary": "#381385",
+                        "surface-bright": "#31394d",
+                        "inverse-primary": "#6d3bd7",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c0c1ff",
+                        "on-primary-fixed": "#23005c",
+                        "primary-container": "#a078ff",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-container": "#9b7fed",
+                        "on-primary-container": "#340080",
+                        "surface-variant": "#2d3449",
+                        "tertiary-fixed": "#e8ddff",
+                        "secondary-fixed-dim": "#c0c1ff",
+                        "surface-container-highest": "#2d3449",
+                        "secondary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#283044",
+                        "outline-variant": "#494454",
+                        "error-container": "#93000a",
+                        "outline": "#958ea0",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-fixed": "#21005e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "bento-gutter": "16px",
+                        "base": "8px",
+                        "element-gap": "12px",
+                        "section-margin": "32px",
+                        "container-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-xl": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .inner-glow {
+            box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.15);
+        }
+        .outer-bloom {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+        .active-glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-lg text-on-surface selection:bg-primary/30 min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-slate-950/40 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-violet-500 hover:bg-white/5 transition-colors p-2 rounded-full">grid_view</button>
+<h1 class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500 font-inter">Konvert</h1>
+</div>
+<div class="flex items-center">
+<div class="w-10 h-10 rounded-full border border-violet-500/30 overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A sophisticated professional headshot of a user against a dark, tech-inspired background with subtle violet bokeh. The lighting is low-key and dramatic, accentuating a sense of high-performance and digital precision. The overall aesthetic is clean, modern, and perfectly aligned with a premium SaaS interface." src="https://lh3.googleusercontent.com/aida/ADBb0ugUesp0njpsFqJB23ZppV0P0JDZWm1aP5qm-u59xkisNqjJQvLpgeUnjx0yjmurQXiUahzIHchgPNcDlD_hYItmuFVjZi30XAj8vdxh3xnDz_QEhhURQ-x-BaD9eIPufwV47oK-yp5JJu6Y5hDxf3Mt58B7kAXalKLoGjYE-Vg_LOuITk11j4JqWHhYr9Qvo1-gr1OvYzyLMi-PtE4IBebZtTXgb-XaUsqiaW-S1347epaXAHU4kEb-zhzAa93DHtbMk3mRFpg"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-container-padding max-w-5xl mx-auto space-y-section-margin">
+<!-- Interactive Upload Zone (Bento Tile) -->
+<section class="glass-card rounded-2xl p-8 border-2 border-dashed border-violet-500/40 flex flex-col items-center justify-center text-center space-y-4 hover:border-violet-500/80 transition-all cursor-pointer group active:scale-[0.98] duration-150">
+<div class="w-20 h-20 bg-violet-500/10 rounded-full flex items-center justify-center mb-2 group-hover:active-glow transition-all">
+<span class="material-symbols-outlined text-5xl text-violet-400" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Drag &amp; Drop or Tap to Upload</h2>
+<p class="text-on-surface-variant font-body-sm max-w-xs">Supports JPG, PNG, and HEIC up to 50MB per file. High-precision rendering guaranteed.</p>
+</section>
+<!-- Uploaded Images Grid -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps text-violet-400 uppercase tracking-widest">Uploaded Images</h3>
+<span class="text-body-sm text-on-surface-variant">4 Files Selected</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+<!-- Image 1 -->
+<div class="flex-shrink-0 relative w-32 h-44 rounded-xl overflow-hidden glass-card group">
+<img class="w-full h-full object-cover" data-alt="A high-resolution photograph of a modern architectural structure with sharp angles and dramatic lighting. The image captures deep shadows and bright highlights, emphasizing a sense of professional precision and technical quality. The color palette is muted with cool undertones, fitting the dark theme of the application." src="https://lh3.googleusercontent.com/aida/ADBb0uiLe3-Czn_MY0M0OHsHzZeu8Enr3nXNFBilzSc9xMCjz8wtCZUH8GcuvTw-d-dX_3AjI7L2YLxw_iB248EocJR1Rf-UyrCdZaiGn6_FEOXdvUbGyBS8W7-bbYA2Uv5y6Qh7XYox_zfdLE74eXHLlrqH2xqdEZFDPnLqw2LKgqcYtOmoSeA6628wYxS00g0snZWnEf1XsOQqQ453G0my-k4o5dUAV1fZZwL23qb0Nrm7mayV7HUmVMyE"/>
+<button class="absolute top-2 right-2 bg-slate-900/80 p-1 rounded-full material-symbols-outlined text-error text-sm opacity-0 group-hover:opacity-100 transition-opacity">close</button>
+<div class="absolute bottom-0 w-full p-2 bg-gradient-to-t from-slate-950 to-transparent">
+<p class="text-[10px] truncate text-on-surface">IMG_0821.jpg</p>
+</div>
+</div>
+<!-- Image 2 -->
+<div class="flex-shrink-0 relative w-32 h-44 rounded-xl overflow-hidden glass-card group">
+<img class="w-full h-full object-cover" data-alt="A sleek close-up of a high-end digital device screen showing complex data visualizations. The lighting is focused and clean, with a deep indigo and obsidian color scheme that resonates with the app's professional aesthetic. The focus is sharp, highlighting every intricate detail of the digital interface." src="https://lh3.googleusercontent.com/aida/ADBb0ujmXu3uSb4C2-p9mwAys4rK79o0yEsJJSjohtQaDWu8r3Cp4qGLg3kqEuZfmOaA5n_OosnGQRSlyn2vbMmEdWfWo86bPgS4mQ-YeBQ4325HcoGIi6IFVpUlaunLyCuat7WjdXKncBxNiiDAFUZ9E94SiPJAhQv5Gz59sSyGVxshItYOJ5BzX8zExF5MEvyavUPpwqbPKz9FYy1JugQa-eBQH3npYYOhqy7cG0y6Ljf-H6lKlIpEKz9b"/>
+<button class="absolute top-2 right-2 bg-slate-900/80 p-1 rounded-full material-symbols-outlined text-error text-sm opacity-0 group-hover:opacity-100 transition-opacity">close</button>
+<div class="absolute bottom-0 w-full p-2 bg-gradient-to-t from-slate-950 to-transparent">
+<p class="text-[10px] truncate text-on-surface">document_01.png</p>
+</div>
+</div>
+<!-- Image 3 -->
+<div class="flex-shrink-0 relative w-32 h-44 rounded-xl overflow-hidden glass-card group">
+<img class="w-full h-full object-cover" data-alt="An artistic capture of soft, flowing light trails in shades of violet and blue against a pure black background. The image has a calm, efficient atmosphere, suggesting speed and modern technology. It provides a beautiful visual contrast to the structured elements of the UI while maintaining color harmony." src="https://lh3.googleusercontent.com/aida/ADBb0uiyW68XCCuc-UfmATF7dOsB7t_QHxYLOM6A_--S9L6cWXHqWtojk7CsvXna1Fjr3BK_5qUw3k6lOfsT6Nuc-XUJKyT-rkEI58dE0HV0bOsw7m2fkmbnI_7EzLH4ZUBPZJj__mAL1a74YEKeyjSp5WcETxvlGjqIhOAxwCZjPJK51Q9km-sOnLkYisOHNYAJoyT-DK5WVJbLMJ5reFnjv0agA0NxNTIt3Jpq6nosKFArkAC-Z6DnoERzrA"/>
+<button class="absolute top-2 right-2 bg-slate-900/80 p-1 rounded-full material-symbols-outlined text-error text-sm opacity-0 group-hover:opacity-100 transition-opacity">close</button>
+<div class="absolute bottom-0 w-full p-2 bg-gradient-to-t from-slate-950 to-transparent">
+<p class="text-[10px] truncate text-on-surface">graphic_export.png</p>
+</div>
+</div>
+<!-- Image 4 -->
+<div class="flex-shrink-0 relative w-32 h-44 rounded-xl overflow-hidden glass-card group">
+<img class="w-full h-full object-cover" data-alt="A minimalist overhead shot of a designer's workspace featuring high-end hardware and clean lines. The setting is professionally lit with a cool, focused glow that highlights textured materials like brushed metal and matte glass. The image evokes a sense of productivity and technical mastery, perfect for a utility dashboard." src="https://lh3.googleusercontent.com/aida/ADBb0uiwpWOPTTFtIfs5CGtLiiZqvagc3w6DUllZ5qTp85lBdEgVCkuki7GSc7HpUpxP3B2mVyLYTWZx5-WwUzlPAvZoKqjRxmdXU5ukIFDKpLkuj2OnVGHuqUsyjx9--bUkgTIj_ovX1obDGwtqvIjnt0KDaNeBotq26ZhgBlGV-wf-Vjea29nnEHao-1V5-4Z7gs1xX_3RCwGS_0Y_esyfgSvQoTEU0MNE9rQymHeRZdEDu1KkklnAmQmUKQ"/>
+<button class="absolute top-2 right-2 bg-slate-900/80 p-1 rounded-full material-symbols-outlined text-error text-sm opacity-0 group-hover:opacity-100 transition-opacity">close</button>
+<div class="absolute bottom-0 w-full p-2 bg-gradient-to-t from-slate-950 to-transparent">
+<p class="text-[10px] truncate text-on-surface">reference_3.jpg</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Conversion Settings (Bento Grid) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-bento-gutter">
+<!-- Page Size & Orientation -->
+<div class="glass-card rounded-2xl p-6 space-y-6">
+<h3 class="font-label-caps text-label-caps text-violet-400 uppercase tracking-widest mb-4">Document Setup</h3>
+<div class="space-y-4">
+<label class="block text-body-sm text-on-surface-variant">Page Size</label>
+<div class="flex bg-surface-container-low rounded-lg p-1">
+<button class="flex-1 py-2 text-body-sm font-semibold rounded-md bg-violet-500 text-on-primary active-glow">A4</button>
+<button class="flex-1 py-2 text-body-sm font-semibold rounded-md text-on-surface-variant hover:text-on-surface">Letter</button>
+</div>
+</div>
+<div class="space-y-4">
+<label class="block text-body-sm text-on-surface-variant">Orientation</label>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-violet-500 bg-violet-500/10 text-violet-400 active-glow">
+<span class="material-symbols-outlined">portrait</span>
+<span class="text-xs font-bold uppercase">Portrait</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-white/10 hover:border-white/20 text-on-surface-variant">
+<span class="material-symbols-outlined">landscape</span>
+<span class="text-xs font-bold uppercase">Landscape</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Margins Slider -->
+<div class="glass-card rounded-2xl p-6 space-y-6 flex flex-col justify-between">
+<div>
+<h3 class="font-label-caps text-label-caps text-violet-400 uppercase tracking-widest mb-4">Margin Precision</h3>
+<div class="space-y-8 mt-4">
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="text-body-sm text-on-surface-variant">Inner Margins</span>
+<span class="text-body-sm text-violet-400 font-bold">12mm</span>
+</div>
+<input class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500" type="range"/>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="text-body-sm text-on-surface-variant">Outer Bleed</span>
+<span class="text-body-sm text-violet-400 font-bold">2mm</span>
+</div>
+<input class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500" type="range"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 mt-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-violet-400">high_quality</span>
+<div>
+<p class="text-body-sm font-semibold">Maximize Quality</p>
+<p class="text-[10px] text-on-surface-variant">Optimized vector rendering</p>
+</div>
+</div>
+<!-- Toggle Switch -->
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-500"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Action -->
+<section class="pt-8">
+<button class="w-full py-5 rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-headline-md flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] transition-all active:scale-[0.97]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">picture_as_pdf</span>
+                CONVERT TO PDF
+            </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-4 font-label-caps uppercase tracking-widest opacity-60">High-Performance Document Utility Dashboard</p>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-slate-950/60 backdrop-blur-2xl border-t border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] rounded-t-2xl">
+<button class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 group">
+<span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">dashboard</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 group">
+<span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">folder_open</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Library</span>
+</button>
+<button class="flex flex-col items-center justify-center text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.5)] after:content-[''] after:w-1 after:h-1 after:bg-violet-500 after:rounded-full after:mt-1">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">construction</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Tools</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 group">
+<span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">settings</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Settings</span>
+</button>
+</nav>
+</body></html>

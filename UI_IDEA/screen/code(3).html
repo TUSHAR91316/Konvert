@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Konvert | Premium Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface-container-low": "#131b2e",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary-fixed-dim": "#cebdff",
+                        "on-secondary": "#1000a9",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-primary": "#3c0091",
+                        "on-tertiary-container": "#31057e",
+                        "on-error": "#690005",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#4f319c",
+                        "on-secondary-fixed": "#07006c",
+                        "primary-fixed-dim": "#d0bcff",
+                        "background": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#b0b2ff",
+                        "surface": "#0b1326",
+                        "secondary-container": "#3131c0",
+                        "tertiary": "#cebdff",
+                        "inverse-surface": "#dae2fd",
+                        "surface-container": "#171f33",
+                        "primary": "#d0bcff",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary": "#381385",
+                        "surface-bright": "#31394d",
+                        "inverse-primary": "#6d3bd7",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c0c1ff",
+                        "on-primary-fixed": "#23005c",
+                        "primary-container": "#a078ff",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-container": "#9b7fed",
+                        "on-primary-container": "#340080",
+                        "surface-variant": "#2d3449",
+                        "tertiary-fixed": "#e8ddff",
+                        "secondary-fixed-dim": "#c0c1ff",
+                        "surface-container-highest": "#2d3449",
+                        "secondary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#283044",
+                        "outline-variant": "#494454",
+                        "error-container": "#93000a",
+                        "outline": "#958ea0",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-fixed": "#21005e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "bento-gutter": "16px",
+                        "base": "8px",
+                        "element-gap": "12px",
+                        "section-margin": "32px",
+                        "container-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-xl": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .inner-glow {
+            box-shadow: inset 0 0 12px rgba(139, 92, 246, 0.1);
+        }
+        .active-glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-on-surface font-body-lg min-h-screen pb-24 selection:bg-primary/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-slate-950/40 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-400 hover:bg-white/5 transition-colors p-2 rounded-lg cursor-pointer" data-icon="grid_view">grid_view</span>
+<span class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">Konvert</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden md:flex gap-6 mr-6">
+<a class="text-violet-400 font-inter font-bold tracking-tight text-sm" href="#">Dashboard</a>
+<a class="text-slate-400 hover:bg-white/5 transition-colors font-inter font-bold tracking-tight text-sm" href="#">Library</a>
+<a class="text-slate-400 hover:bg-white/5 transition-colors font-inter font-bold tracking-tight text-sm" href="#">Tools</a>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a user with a soft-focus office background, lit with a violet ambient glow to match the dark mode dashboard aesthetic. The subject is a person in creative professional attire, conveying high-performance and modern technical expertise." src="https://lh3.googleusercontent.com/aida/ADBb0uiwpWOPTTFtIfs5CGtLiiZqvagc3w6DUllZ5qTp85lBdEgVCkuki7GSc7HpUpxP3B2mVyLYTWZx5-WwUzlPAvZoKqjRxmdXU5ukIFDKpLkuj2OnVGHuqUsyjx9--bUkgTIj_ovX1obDGwtqvIjnt0KDaNeBotq26ZhgBlGV-wf-Vjea29nnEHao-1V5-4Z7gs1xX_3RCwGS_0Y_esyfgSvQoTEU0MNE9rQymHeRZdEDu1KkklnAmQmUKQ"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-7xl mx-auto space-y-section-margin">
+<!-- Search Section -->
+<section class="w-full max-w-2xl mx-auto">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-violet-400 transition-colors" data-icon="search">search</span>
+<input class="w-full bg-slate-900/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50 outline-none backdrop-blur-md transition-all text-body-lg placeholder:text-slate-600" placeholder="Search for tools, files, or tasks..." type="text"/>
+</div>
+</section>
+<!-- Featured Tools -->
+<section>
+<h2 class="text-label-caps font-label-caps text-slate-500 mb-4 ml-1">Featured Tools</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-bento-gutter">
+<!-- Compress PDF -->
+<div class="glass-card rounded-2xl p-6 group cursor-pointer relative overflow-hidden transition-all hover:active-glow hover:scale-[1.01]">
+<div class="relative z-10 flex justify-between h-full min-h-[160px] flex-col">
+<div>
+<span class="material-symbols-outlined text-4xl text-violet-500 mb-4" data-icon="compress">compress</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Compress PDF</h3>
+<p class="text-body-sm text-on-surface-variant mt-2 max-w-[200px]">Reduce file size without losing quality for fast sharing.</p>
+</div>
+<div class="flex items-center gap-2 text-violet-400 font-bold text-sm group-hover:gap-4 transition-all">
+<span>Open Tool</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-20 group-hover:opacity-40 transition-opacity">
+<img class="w-full h-full object-cover rounded-l-3xl" data-alt="A high-tech digital representation of data compression, showing neon violet light patterns folding into each other. The aesthetic is clean, minimalist, and futuristic, with a deep obsidian background and sharp, technical light effects that signify efficiency and digital precision." src="https://lh3.googleusercontent.com/aida/ADBb0uhM_05vcQuLNQilHzaJ2V3jaWGC2lTU80kczS6S3zA7l2hXnIBCWnxiXv32gKHjBRHbrSw-GBH8eka64MJlfuUOKxmePWi_IUaN9xnoAEKBkQiPoFsDOfdTEKjDjPL2MsbXnQVTh1GVW-YvN-zCYo2zELwgG2YO7Ec_1EIE53dYd3krPdy6vmZRfVt3mOzXt_TQy_mAIqy8zttk2Z8RZgarSsutevmWmSd8mudnz3FWesaeLxIvwbhQfA"/>
+</div>
+</div>
+<!-- Merge PDFs -->
+<div class="glass-card rounded-2xl p-6 group cursor-pointer relative overflow-hidden transition-all hover:active-glow hover:scale-[1.01]">
+<div class="relative z-10 flex justify-between h-full min-h-[160px] flex-col">
+<div>
+<span class="material-symbols-outlined text-4xl text-indigo-400 mb-4" data-icon="layers">layers</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Merge PDFs</h3>
+<p class="text-body-sm text-on-surface-variant mt-2 max-w-[200px]">Combine multiple documents into a single organized file.</p>
+</div>
+<div class="flex items-center gap-2 text-indigo-400 font-bold text-sm group-hover:gap-4 transition-all">
+<span>Open Tool</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-20 group-hover:opacity-40 transition-opacity">
+<img class="w-full h-full object-cover rounded-l-3xl" data-alt="Abstract digital layers of glass floating in a dark vacuum, illuminated by soft violet and blue edges. The scene conveys organization and structural merging, maintaining a premium, high-contrast dark mode feel with deep blacks and vibrant, glowing outlines." src="https://lh3.googleusercontent.com/aida/ADBb0uhR3tV6ROFV_XPpM22xQJLon7xFlzn35UpW42H2ZhWQ_xR_i78EDP6faSWCyPQlgye9HTyGR2FnGvNNwyrdhyt8OCxHQu7w26ku8YWgllNokXG2L2-RN7KFVXcPtgaQIoNBUz850QNB3dy3B7FghGQCVWQ6jGukPg8lyXzJatFogFD-qSVDJS3ox4XKJNidQzN_wZaAkgJpzppbplPbJ8J6lZM6Msk491SVcYl0t-9OEjWtCkO8CB5xcQ"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Tool Grid -->
+<section>
+<h2 class="text-label-caps font-label-caps text-slate-500 mb-4 ml-1">All Conversion Tools</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-bento-gutter">
+<!-- Tool Item 1 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</div>
+<span class="text-body-sm font-semibold text-on-surface">Image to PDF</span>
+</div>
+<!-- Tool Item 2 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+</div>
+<span class="text-body-sm font-semibold text-on-surface">Word to PDF</span>
+</div>
+<!-- Tool Item 3 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="picture_as_pdf">picture_as_pdf</span>
+</div>
+<span class="text-body-sm font-semibold text-on-surface">PDF to JPG</span>
+</div>
+<!-- Tool Item 4 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="table_view">table_view</span>
+</div>
+<span class="text-body-sm font-semibold text-on-surface">Excel to PDF</span>
+</div>
+<!-- Tool Item 5 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</div>
+<span class="text-body-sm font-semibold text-on-surface">Edit PDF</span>
+</div>
+<!-- Tool Item 6 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+</div>
+<span class="text-body-sm font-semibold text-on-surface">Unlock PDF</span>
+</div>
+</div>
+</section>
+<!-- Recent Conversions -->
+<section>
+<div class="flex justify-between items-end mb-4">
+<h2 class="text-label-caps font-label-caps text-slate-500 ml-1">Recent Conversions</h2>
+<button class="text-xs text-violet-400 font-bold hover:underline">View All History</button>
+</div>
+<div class="glass-card rounded-2xl overflow-hidden">
+<div class="divide-y divide-white/5">
+<!-- Conversion Item 1 -->
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-400" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<h4 class="text-body-sm font-semibold text-on-surface">annual_report_2023.pdf</h4>
+<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Compress • 2.4 MB</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-xs text-slate-500 hidden sm:block">2 mins ago</span>
+<button class="p-2 rounded-lg bg-white/5 text-on-surface hover:bg-violet-500 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+</button>
+</div>
+</div>
+<!-- Conversion Item 2 -->
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-violet-400 animate-pulse" data-icon="sync">sync</span>
+</div>
+<div>
+<h4 class="text-body-sm font-semibold text-on-surface">portfolio_images.zip</h4>
+<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Images to PDF • 45 MB</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-xs text-slate-500 hidden sm:block">Processing...</span>
+<button class="p-2 rounded-lg bg-white/5 text-slate-600 cursor-not-allowed">
+<span class="material-symbols-outlined text-sm" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Conversion Item 3 -->
+<div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-400" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<h4 class="text-body-sm font-semibold text-on-surface">legal_contract_v2.docx</h4>
+<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Word to PDF • 1.1 MB</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-xs text-slate-500 hidden sm:block">1 hour ago</span>
+<button class="p-2 rounded-lg bg-white/5 text-on-surface hover:bg-violet-500 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-slate-950/60 backdrop-blur-2xl border-t border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.5)] rounded-t-2xl">
+<a class="flex flex-col items-center justify-center text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.5)] after:content-[''] after:w-1 after:h-1 after:bg-violet-500 after:rounded-full after:mt-1 transform scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="construction">construction</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Tools</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-widest mt-1">Settings</span>
+</a>
+</nav>
+<!-- Contextual FAB - Dashboard active -->
+<button class="fixed right-6 bottom-28 w-14 h-14 bg-gradient-to-tr from-violet-500 to-indigo-500 text-white rounded-full shadow-lg shadow-violet-500/20 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+</body></html>
