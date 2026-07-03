@@ -46,8 +46,13 @@ app.*.map.json
 . e n v 
  
  
-/.env
+**/.env
 
 ngrok.yml
 backend.zip
 *.zip
+
+# AI and Workflow Context
+AI_AGENT.md
+CHAT.md
+WORKFLOW.md

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart'; // Required for FileImage
 
@@ -59,29 +60,48 @@ class ConversionService {
       "file": await MultipartFile.fromFile(file.path, filename: fileName),
     });
 
+    final Directory outputDir;
+    if (outputDirPath != null) {
+      outputDir = Directory(outputDirPath);
+    } else {
+      outputDir = await getTemporaryDirectory();
+    }
+
+    final outputFile = File("${outputDir.path}/converted_${DateTime.now().millisecondsSinceEpoch}.$targetFormat");
+
     try {
       final String dynamicBackendUrl = await ConfigService().getBackendUrl();
-      final response = await _dio.post(
+      await _dio.download(
         '$dynamicBackendUrl/convert',
+        outputFile.path,
         data: formData,
         queryParameters: {'target_format': targetFormat},
-        options: Options(
-          responseType: ResponseType.bytes, // Important for downloading file
-        ),
+        options: Options(method: 'POST'),
       );
-
-      final Directory outputDir;
-      if (outputDirPath != null) {
-        outputDir = Directory(outputDirPath);
-      } else {
-        outputDir = await getTemporaryDirectory();
-      }
-
-      final outputFile = File("${outputDir.path}/converted_${DateTime.now().millisecondsSinceEpoch}.$targetFormat");
-      await outputFile.writeAsBytes(response.data);
+      
       return outputFile;
 
     } on DioException catch (e) {
+      // Check if dio.download wrote the JSON error to the output file
+      if (outputFile.existsSync()) {
+        try {
+          if (outputFile.lengthSync() < 10000) {
+            String errorString = outputFile.readAsStringSync();
+            final errorJson = jsonDecode(errorString);
+            outputFile.deleteSync();
+            throw ConversionException(
+              code: errorJson['error_code'] ?? 'UNKNOWN',
+              message: errorJson['message'] ?? e.message ?? 'Unknown error',
+              resolution: errorJson['resolution'] ?? 'Please try again.',
+            );
+          }
+        } catch (parseError) {
+          if (parseError is ConversionException) rethrow;
+          // Fallback if parsing fails
+        }
+        outputFile.deleteSync(); // always clean up failed download
+      }
+
       final statusCode = e.response?.statusCode;
       if (statusCode == 503) {
         throw Exception(
@@ -107,4 +127,19 @@ class ConversionService {
       }
     }
   }
+}
+
+class ConversionException implements Exception {
+  final String code;
+  final String message;
+  final String resolution;
+
+  ConversionException({
+    required this.code,
+    required this.message,
+    required this.resolution,
+  });
+
+  @override
+  String toString() => "[$code] $message\nResolution: $resolution";
 }

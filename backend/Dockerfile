@@ -2,9 +2,9 @@ FROM python:3.12-slim
 
 # Install LibreOffice and dependencies
 RUN apt-get update && apt-get install -y \
-    libreoffice \
-    default-jre \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+  libreoffice \
+  default-jre \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

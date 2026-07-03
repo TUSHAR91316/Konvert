@@ -42,6 +42,12 @@ class VirusTotalService {
 
     final headers = {'x-apikey': apiKey};
 
+    // Free API tier file size limit (32MB)
+    final int fileSize = await file.length();
+    if (fileSize > 32 * 1024 * 1024) {
+      throw Exception("File exceeds VirusTotal's 32MB limit. Please disable Auto-Scan for large files.");
+    }
+
     // Step 1: Check by SHA-256 hash first — avoids 409 if VT already has it.
     final fileHash = await _sha256OfFile(file);
     try {

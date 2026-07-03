@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -38,8 +39,16 @@ CREATE TABLE $_tableName (
     try {
       final db = await database;
       final results = await db.query(_tableName, orderBy: 'timestamp DESC');
-      // Convert Map<String, Object?> to Map<String, dynamic>
-      return results.map((e) => Map<String, dynamic>.from(e)).toList();
+      final validResults = <Map<String, dynamic>>[];
+      for (var e in results) {
+        final path = e['resultPath'] as String;
+        if (File(path).existsSync()) {
+          validResults.add(Map<String, dynamic>.from(e));
+        } else {
+          await db.delete(_tableName, where: 'id = ?', whereArgs: [e['id']]);
+        }
+      }
+      return validResults;
     } catch (e) {
       return [];
     }

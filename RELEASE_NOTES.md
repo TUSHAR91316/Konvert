@@ -1,5 +1,23 @@
 # Konvert Release Notes
 
+## Version 1.6.4
+*Bug Fixes & Stability Updates*
+
+**Highlights**
+This release focuses entirely on making the app rock-solid. We conducted a deep audit and fixed several major crashes, memory leaks, and added highly detailed error handling so you always know exactly what went wrong during a conversion.
+
+**Robust Error Handling**
+- **Numeric Error Codes**: The app now displays specific Error Codes (e.g., `4001`, `5001`, `5002`) instead of generic "Conversion failed" messages. 
+- **Actionable Resolutions**: Whenever an error occurs, a beautiful dialog box pops up giving you a clear English explanation of why the failure happened, and a "Tip" on how to resolve it.
+
+**Bug Fixes**
+- 🐛 **Fixed Backend Storage Leak**: Deeply corrupted files crashing the self-hosted backend will no longer permanently consume hard drive space. The backend now forcibly cleans up orphaned files on failure.
+- 🐛 **Fixed Out-Of-Memory Crash**: Massive conversions (100MB+) will no longer crash older Android phones. The app now uses a streaming download engine (`dio.download`) to save files directly to the SSD instead of buffering in RAM.
+- 🐛 **Fixed VirusTotal Crash**: The app now intelligently checks file size before uploading. If the file exceeds the free VirusTotal 32MB limit, the upload is safely aborted with a friendly warning.
+- 🐛 **Fixed History Sync**: If you delete a PDF locally on your phone via a file manager, the Konvert app now auto-detects this and silently cleans up the broken link from your History log.
+
+---
+
 ## Version 1.6.3
 *UI Overhaul — Obsidian Design System*
 

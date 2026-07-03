@@ -89,22 +89,12 @@ This application relies on a local Docker backend securely exposed via an ngrok 
 
 1. **Download the Backend Files**
    Because Konvert is closed-source, you can download the backend server files (`backend.zip`) directly from our [Public GitHub Releases Page](https://github.com/TUSHAR91316/Konvert-Website/releases). Extract this `backend.zip` folder to your computer.
-2. **Run the Backend (Docker)**:
-   Navigate to the extracted `backend/` folder and run the container locally on port 8080:
+2. **Configure Your Credentials**:
+   Inside the extracted folder, rename `.env.example` to `.env`. Paste your free Ngrok Auth Token and Static Domain inside this file.
+3. **Run the Backend (Docker Compose)**:
+   Navigate to the extracted folder in terminal and start the server and secure tunnel instantly:
    ```bash
-   docker build -t converter-backend .
-   docker run -d -p 8080:8080 converter-backend
-   ```
-3. **Start the ngrok Tunnel**:
-   Expose your local backend to the internet securely using `ngrok` (with your static domain):
-   ```bash
-   ngrok http --domain=your-static-domain.ngrok-free.app 8080
-   ```
-   *Tip: If you use a personal Windows device, you can run ngrok silently by creating a `.bat` file with:*
-   ```bat
-   @ECHO OFF
-   Start-Process ngrok -ArgumentList "http --domain=your-static-domain.ngrok-free.app 8080" -WindowStyle Hidden
+   docker-compose up -d --build
    ```
 4. **Configure App Settings**:
    Launch the app on your device/emulator. Navigate to the **Settings** screen inside Konvert and paste your static `.ngrok-free.app` URL into the "Backend URL" field to connect globally instantly!
-   *(Note: You no longer need to edit `.env` or rebuild the APK!)*

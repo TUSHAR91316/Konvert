@@ -131,6 +131,13 @@ class _ConvertScreenState extends State<ConvertScreen> {
         _isConverting = false;
         _isSuccess = true;
       });
+    } on ConversionException catch (e) {
+      setState(() {
+        _statusMessage = 'Conversion failed';
+        _isConverting = false;
+        _isSuccess = false;
+      });
+      _showErrorDialog(e.code, e.message, e.resolution);
     } catch (e) {
       setState(() {
         _statusMessage = e.toString().replaceFirst('Exception: ', '');
@@ -138,6 +145,33 @@ class _ConvertScreenState extends State<ConvertScreen> {
         _isSuccess = false;
       });
     }
+  }
+
+  void _showErrorDialog(String code, String message, String resolution) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.isDark ? KColors.surfaceContainerLow : KColors.lightSurfaceContainer,
+        title: Text(code, style: context.kHeadlineSM.copyWith(color: KColors.error)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message, style: context.kBodySM),
+            const SizedBox(height: 16),
+            Text("RESOLUTION", style: context.kLabelCaps.copyWith(color: KColors.primary)),
+            const SizedBox(height: 4),
+            Text(resolution, style: context.kBodySM),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('DISMISS', style: context.kLabelCaps.copyWith(color: KColors.primary)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
