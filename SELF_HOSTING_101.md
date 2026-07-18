@@ -1,84 +1,120 @@
 # Konvert 101: Complete Setup & Self-Hosting Guide 🚀
 
-Welcome to Konvert! Because we take user privacy seriously, we don't rely on centralized cloud servers for document processing. Instead, **you** play the role of the cloud provider. 
+Welcome to Konvert! Because we take user privacy seriously, we don't rely on centralized cloud servers for document processing. Instead, **you** host your own private conversion backend. 
 
-By following this guide, you will set up a local backend server on your computer that your mobile app will securely talk to. Your documents never leave your control, and everything is instantly deleted after processing.
-
-Let's get everything set up in less than 10 minutes!
+By following this guide, you will set up a local Docker backend on your computer that your mobile app will securely communicate with. Your documents never leave your control, and everything is instantly deleted from the server after conversion.
 
 ---
 
 ## 🛠️ Prerequisites
-Before we start, verify that you have the following installed on your computer:
-1. **Docker Desktop** ([Download here](https://www.docker.com/products/docker-desktop/)) - Required to run the LibreOffice backend container and Ngrok tunnel.
 
-*(Note: Ngrok is built directly into our setup, so you don't need to download it separately!)*
+Before starting, verify you have the following installed on your host machine:
+1. **Docker Desktop** ([Download here](https://www.docker.com/products/docker-desktop/)) - Required to run the containerized backend.
+2. **Active Internet Connection** - Required to route traffic from your mobile device to your home server.
 
 ---
 
-## Step 1: Claim Your Free Static Domain (Ngrok)
+## 🌐 Step 1: Claim Your Free Static Domain (Ngrok)
 
-We need to safely expose your local server to the internet so that your mobile app can access it from anywhere using Wi-Fi or Cellular data. We use **Ngrok** for this.
+To allow the Konvert mobile app to reach your home machine securely over cellular data or external Wi-Fi, you need a public URL. We use **Ngrok** to create a secure, encrypted HTTPS tunnel.
 
 1. Sign up for a free [ngrok account](https://dashboard.ngrok.com/).
-2. Find your **Auth Token** on the dashboard.
-3. Claim your **Free Static Domain** (e.g., `cute-dog-123.ngrok-free.app`). This domain is yours permanently!
+2. Go to your Ngrok Dashboard and retrieve your **Auth Token**.
+3. Go to the **Domains** section and claim your **Free Static Domain** (e.g., `fancy-otter-123.ngrok-free.app`). This domain is permanent and free!
 
 ---
 
-## Step 2: Setting up the Local Backend
+## 🐳 Step 2: Deployment Methods
 
-Our backend service handles complex document conversions (like DOCX, PPTX, or XLSX formats). We have containerized it to ensure it runs fully offline and isolated on your machine.
+Choose **one** of the two methods below to spin up your backend:
+
+### Method A: Docker Compose (Recommended & Easiest)
+This method spins up both the backend API and the Ngrok tunnel inside Docker automatically. You do not need to install Ngrok on your local machine.
 
 1. **Download the Backend Files**:
-   Go to the [Konvert Releases Page](https://github.com/TUSHAR91316/Konvert-Website/releases) and download the **`backend.zip`** file. Extract it, and open your Terminal / Command Prompt inside that extracted folder.
-
-2. **Configure Your Credentials**:
-   Inside the extracted folder, you will see a file named `.env.example`.
-   * Rename it or copy it to just `.env`
-   * Open `.env` in a text editor and paste your Ngrok Auth Token and Static Domain:
-     ```env
-     NGROK_AUTHTOKEN=your_auth_token_here
-     NGROK_DOMAIN=cute-dog-123.ngrok-free.app
-     ```
-
-3. **Start the Server**:
-   Run the following command to download all necessary tools and start your server in the background:
+   Download the **`backend.zip`** from the [Konvert Releases Page](https://github.com/TUSHAR91316/Konvert-Website/releases) (or navigate to the `/backend` folder if you cloned the source code).
+2. **Extract & Open**:
+   Extract the zip file and open a Terminal / Command Prompt inside that directory.
+3. **Configure Environment variables**:
+   Locate `.env.example` in the folder, rename it to `.env`, and open it in a text editor. Add your credentials:
+   ```env
+   NGROK_AUTHTOKEN=your_actual_ngrok_auth_token_here
+   NGROK_DOMAIN=fancy-otter-123.ngrok-free.app
+   ```
+4. **Launch the Stack**:
+   Run the following command:
    ```bash
    docker-compose up -d --build
    ```
-   > 🎉 **Success:** Your backend and secure Ngrok tunnel are now running in the background!
+   *Your server and secure tunnel are now running in the background!*
 
 ---
 
-## Step 3: Configuring the Mobile App
+### Method B: Standalone Docker (Manual / Developer Mode)
+Choose this if you want to run the Docker container manually and tunnel the traffic yourself using a local Ngrok or Cloudflare installation.
 
-Now that your personal cloud is running securely on the internet, you just need to point the Konvert app to it.
+1. **Build & Run the Container**:
+   Open terminal in the `/backend` folder and run:
+   ```bash
+   # Build the image
+   docker build -t konvert-backend .
 
-1. **Install Konvert:**
-   * Download the latest APK from the **GitHub Actions / Releases** tab.
+   # Run the container (maps backend port 8080 to host port 8080)
+   docker run -d -p 8080:8080 --name konvert-backend konvert-backend
+   ```
+2. **Expose the Port**:
+   In a separate terminal window, use your preferred tunneling tool:
+   * **Using Ngrok CLI**:
+     ```bash
+     ngrok http 8080 --url=fancy-otter-123.ngrok-free.app
+     ```
+   * **Using Cloudflare Tunnel (Alternative)**:
+     ```bash
+     cloudflared tunnel --url http://localhost:8080
+     ```
 
-2. **Open the Settings Screen:**
-   Inside the Konvert application, find and tap on "Settings" or "Configuration".
+---
 
-3. **Paste your Domain:**
-   Look for the **Backend URL** field. 
-   Paste the static URL you got from ngrok. It should look like this: `https://cute-dog-123.ngrok-free.app`.
+## 📱 Step 3: Configure the Mobile App
 
+Now that your personal cloud is running securely, point the Konvert app to it.
+
+1. **Get the App**: Download and install the latest APK from the GitHub releases page.
+2. **Go to Settings**: Open Konvert, go to **Settings** (or tap the System Status card on the Dashboard).
+3. **Enter Backend URL**: 
+   * Paste your static domain URL (including `https://`). Example: `https://fancy-otter-123.ngrok-free.app`
+   * Tap **Test Connection** or save.
 4. **Convert Safely!**
-   You're finished! Now whenever you convert a proprietary office document, your phone will securely send it to your `ngrok` tunnel, which routes it directly to the `Docker` container running on your laptop. Once done, the server immediately wipes the file data.
+   You're all set! When converting Word, Excel, or PPT documents, they are sent to your tunnel, processed locally on your own computer, and wiped instantly.
 
 ---
 
-## 🙋 Frequently Asked Questions
+## 🔍 Step 4: Verify Your Server Status
 
-**Does Image-to-PDF conversion require the backend?**
-No! While single Image conversions (JPG, PNG to PDF) will attempt to leverage the backend first for cloud-based rendering, if the server is offline or unreachable it automatically and silently falls back to 100% offline processing using your phone's processor. Multiple image merging is always processed completely on-device.
+You can check if your server is running properly by visiting the health check URL in your web browser:
+`https://fancy-otter-123.ngrok-free.app/health`
 
-**Do I have to do this every time?**
-You only have to install Docker and set up the `.env` file once! The containers are configured to start automatically if your PC restarts. If you ever manually stop them, simply open terminal and run:
-`docker-compose up -d` 
+It should return a JSON response:
+```json
+{"status": "ok"}
+```
 
-**Is it really secure?**
-> [!TIP]
-> Yes! ngrok provides industry-standard SSL encryption (HTTPS). Additionally, because you host the container yourself, you aren't uploading your private resumés or documents to a random third-party internet converter that might harvest your private data.
+---
+
+## 🛠️ Troubleshooting & FAQs
+
+### Port 8080 is already in use
+If another application on your computer is using port 8080, the container will fail to start. Open `docker-compose.yml` and change the port mapping:
+```yaml
+ports:
+  - "9090:8080" # Map host port 9090 to container port 8080
+```
+Update your Ngrok command/config to tunnel port `9090` instead of `8080`.
+
+### Ngrok Browser Warning Page
+When accessing the tunnel via a browser, Ngrok displays a warning page. **Don't worry:** the Konvert mobile client automatically sends a custom header `ngrok-skip-browser-warning` to bypass this warning and communicate with the API directly.
+
+### Checking Server Logs
+If document conversions are failing, inspect the logs to diagnose the issue:
+* **Docker Compose**: `docker-compose logs -f`
+* **Standalone Docker**: `docker logs -f konvert-backend`
