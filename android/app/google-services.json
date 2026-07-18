@@ -7,18 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:422589866231:android:97c38fad00b473d60473f2",
+        "mobilesdk_app_id": "1:422589866231:android:2742932a335ccb8d0473f2",
         "android_client_info": {
-          "package_name": "com.example.converter_app"
+          "package_name": "com.konvert"
         }
       },
       "oauth_client": [
         {
-          "client_id": "422589866231-uot0dm8itsnvf01hufhm19qmnpr72b5i.apps.googleusercontent.com",
+          "client_id": "422589866231-1jlqsoe5jllh3i2d10cs6a987j528bqi.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.converter_app",
-            "certificate_hash": "e023ff05d4769f2099eefaedce3d4a4eaf9c6263"
+            "package_name": "com.konvert",
+            "certificate_hash": "e023ff056263d4769f2099eefaedce3d4a4eaf9c"
+          }
+        },
+        {
+          "client_id": "422589866231-mb25jf3st28k8nudjeuqh5k3999f270g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.konvert",
+            "certificate_hash": "d83015955fe934b140197b8e6490504a9d89b8f5"
           }
         },
         {
@@ -42,7 +50,7 @@
               "client_id": "422589866231-ubkrkt83fba4fa03nuggbmat4icdin4n.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.converterApp"
+                "bundle_id": "com.konvert"
               }
             }
           ]

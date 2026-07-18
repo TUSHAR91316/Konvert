@@ -48,11 +48,17 @@ app.*.map.json
  
 **/.env
 
+# Android Signing Keys (NEVER commit these — keep offline backup!)
+android/key.properties
+android/keys/
+*.jks
+*.keystore
+
 ngrok.yml
 backend.zip
 *.zip
 
-# AI and Workflow Context
-AI_AGENT.md
+# AI and Workflow Context (local only — never commit)
+.ai/
 CHAT.md
-WORKFLOW.md
+

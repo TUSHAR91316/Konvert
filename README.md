@@ -83,6 +83,13 @@ This project uses **GitHub Actions** to enjoy a modern DevOps workflow.
 | **Flutter CI** | ![Flutter CI](https://github.com/TUSHAR91316/converter_app/actions/workflows/flutter_ci.yml/badge.svg?branch=main) | Automatically lints, tests, and builds the Android APK on every push. **Artifacts (APKs) are downloadable** from the Actions tab. |
 | **Backend CI** | ![Backend CI](https://github.com/TUSHAR91316/converter_app/actions/workflows/backend_ci.yml/badge.svg?branch=main) | Lints Python code and verifies the Docker build to prevent deployment errors. |
 
+## 🛠️ Local Pipeline
+
+Konvert also includes native **Git Hooks** to ensure code quality *before* it leaves your machine:
+- **pre-commit**: Automatically runs `flutter analyze` to catch any linting issues.
+- **pre-push**: Automatically runs `flutter test` to ensure all unit and widget tests pass.
+See `TESTING.md` for more details on the testing infrastructure.
+
 ## 🚀 Getting Started!
 
 This application relies on a local Docker backend securely exposed via an ngrok Tunnel with a static domain, eliminating cloud hosting costs while retaining global accessibility for your mobile app.

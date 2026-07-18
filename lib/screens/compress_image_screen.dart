@@ -141,9 +141,7 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                   duration: const Duration(milliseconds: 200),
                   height: context.uploadZoneHeight,
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? KColors.surfaceContainerLow
-                        : KColors.lightSurfaceContainer,
+                    color: context.sectionBg,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: _selectedFile == null
@@ -211,9 +209,8 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
 
                 // ── Mode Selector ──
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration:
-                      isDark ? KDecorations.glassCard() : KDecorations.lightCard(),
+                  padding: EdgeInsets.all(context.kSpacingMD),
+                  decoration: context.bentoCard,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -308,9 +305,8 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                 GestureDetector(
                   onTap: _pickDirectory,
                   child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration:
-                        isDark ? KDecorations.glassCard(radius: 14) : KDecorations.lightCard(radius: 14),
+                    padding: EdgeInsets.all(context.kSpacingMD),
+                    decoration: context.bentoCard,
                     child: Row(
                       children: [
                         Icon(Icons.folder_outlined, color: KColors.primary, size: 20),
@@ -342,9 +338,8 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
                 // ── Progress / CTA ──
                 if (_isCompressing) ...[
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration:
-                        isDark ? KDecorations.glassCard() : KDecorations.lightCard(),
+                    padding: EdgeInsets.all(context.kSpacingMD),
+                    decoration: context.bentoCard,
                     child: Column(
                       children: [
                         ClipRRect(

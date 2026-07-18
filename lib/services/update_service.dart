@@ -2,11 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:converter_app/theme/app_colors.dart';
+import 'package:converter_app/theme/app_text_styles.dart';
 
 class UpdateService {
-  final Dio _dio = Dio();
+  final Dio _dio;
   final String _githubLatestReleaseUrl =
       'https://api.github.com/repos/TUSHAR91316/Konvert-Website/releases/latest';
+
+  UpdateService({Dio? dio}) : _dio = dio ?? Dio();
 
   Future<void> checkForUpdate(BuildContext context) async {
     try {
@@ -17,13 +21,13 @@ class UpdateService {
         final String releaseNotes = response.data['body'] ?? 'Minor bug fixes and performance improvements.';
 
         if (latestVersionTag.isNotEmpty && releaseUrl.isNotEmpty) {
-          // Clean the tag string, e.g., 'v1.6.2' -> '1.6.2'
-          final latestVersion = latestVersionTag.replaceAll('v', '').trim();
+          // Clean the tag string, e.g., 'v1.6.2' or 'V1.6.2' -> '1.6.2'
+          final latestVersion = latestVersionTag.replaceAll(RegExp(r'[vV]'), '').trim();
 
           final PackageInfo packageInfo = await PackageInfo.fromPlatform();
           final String currentVersion = packageInfo.version;
 
-          if (_isUpdateAvailable(currentVersion, latestVersion)) {
+          if (isUpdateAvailable(currentVersion, latestVersion)) {
             if (context.mounted) {
               _showUpdateDialog(context, latestVersion, releaseNotes, releaseUrl);
             }
@@ -36,7 +40,8 @@ class UpdateService {
     }
   }
 
-  bool _isUpdateAvailable(String current, String latest) {
+  @visibleForTesting
+  bool isUpdateAvailable(String current, String latest) {
     try {
       // Stripping out build numbers if present (e.g. 1.6.1+6 -> 1.6.1)
       current = current.split('+').first;
@@ -59,17 +64,29 @@ class UpdateService {
 
   void _showUpdateDialog(
       BuildContext context, String newVersion, String releaseNotes, String url) {
+    final isDark = context.isDark;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
+          backgroundColor: context.cardBg,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: isDark ? KColors.outline : KColors.lightOutline,
+              width: 1,
+            ),
+          ),
+          title: Row(
             children: [
-              Icon(Icons.system_update_rounded, color: Colors.blue, size: 28),
-              SizedBox(width: 8),
-              Text('Update Available!'),
+              Icon(Icons.system_update_rounded, color: KColors.primary, size: 24),
+              const SizedBox(width: 10),
+              Text(
+                'Update Available!',
+                style: context.kHeadlineSM,
+              ),
             ],
           ),
           content: SingleChildScrollView(
@@ -79,20 +96,23 @@ class UpdateService {
               children: [
                 Text(
                   'Version $newVersion is now out! You are on an older version.',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: context.kBodySM.copyWith(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 12),
-                const Text('What\'s new:', style: TextStyle(color: Colors.black54)),
-                const SizedBox(height: 4),
+                const SizedBox(height: 16),
+                Text('What\'s new:', style: context.kLabelSM),
+                const SizedBox(height: 8),
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: context.sectionBg,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     releaseNotes,
-                    style: const TextStyle(fontSize: 13),
+                    style: context.kBodySM.copyWith(
+                      color: context.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -101,20 +121,29 @@ class UpdateService {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Later', style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              child: Text(
+                'Later',
+                style: KTextStyles.bodySM(
+                  color: isDark ? KColors.onSurfaceVariant : KColors.lightOnSurfaceVariant,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
-              onPressed: () async {
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () async {
                 final Uri uri = Uri.parse(url);
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 }
               },
-              child: const Text('Download Update', style: TextStyle(color: Colors.white)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: KDecorations.gradientButton(radius: 10),
+                child: Text(
+                  'Download Update',
+                  style: KTextStyles.button(),
+                ),
+              ),
             ),
           ],
         );

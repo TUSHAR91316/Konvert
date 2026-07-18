@@ -4,8 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class VirusTotalService {
-  final Dio _dio = Dio();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final Dio _dio;
+  final FlutterSecureStorage _storage;
+
+  VirusTotalService({Dio? dio, FlutterSecureStorage? storage})
+      : _dio = dio ?? Dio(),
+        _storage = storage ?? const FlutterSecureStorage();
+
   static const String _baseUrl = 'https://www.virustotal.com/api/v3';
 
   Future<String?> getApiKey() async {

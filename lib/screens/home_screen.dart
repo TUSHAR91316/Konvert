@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:converter_app/main.dart';
+import 'package:dio/dio.dart';
+import 'package:converter_app/services/config_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -101,11 +103,39 @@ class _DashboardTab extends StatefulWidget {
 
 class _DashboardTabState extends State<_DashboardTab> {
   List<Map<String, dynamic>> _recentHistory = [];
+  bool _isBackendOnline = false;
+  bool _checkingStatus = true;
+  int _historyCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadRecent();
+    _checkSystemStatus();
+  }
+
+  Future<void> _checkSystemStatus() async {
+    setState(() => _checkingStatus = true);
+    try {
+      final backendUrl = await ConfigService().getBackendUrl();
+      debugPrint('Checking backend status at: $backendUrl/health');
+      final response = await Dio().get('$backendUrl/health').timeout(const Duration(seconds: 4));
+      debugPrint('Backend response: ${response.statusCode}');
+      if (mounted) {
+        setState(() {
+          _isBackendOnline = response.statusCode == 200;
+          _checkingStatus = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('System status check failed: $e');
+      if (mounted) {
+        setState(() {
+          _isBackendOnline = false;
+          _checkingStatus = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadRecent() async {
@@ -113,14 +143,23 @@ class _DashboardTabState extends State<_DashboardTab> {
     if (mounted) {
       setState(() {
         _recentHistory = all.take(3).toList();
+        _historyCount = all.length;
       });
     }
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   }
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final name = user?.displayName?.split(' ').first ?? 'there';
+    final name = user?.displayName?.split(' ').first;
+    final greetingText = name != null ? '${_getGreeting()}, $name' : _getGreeting();
 
     return RefreshIndicator(
       color: KColors.primary,
@@ -133,14 +172,99 @@ class _DashboardTabState extends State<_DashboardTab> {
           children: [
             // ── Greeting ──
             Text(
-              'Hello, $name 👋',
+              greetingText,
               style: context.kHeadlineXL,
             ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, curve: Curves.easeOut),
             const SizedBox(height: 4),
             Text(
-              'What do you want to convert today?',
+              'What would you like to convert today?',
               style: context.kBodySM,
             ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+            const SizedBox(height: 16),
+
+            // ── System Status & Stats Row ──
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(context.kSpacingMD),
+                    decoration: context.bentoCard,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('SYSTEM STATUS', style: context.kLabelCaps.copyWith(fontSize: 10)),
+                            _checkingStatus
+                                ? const SizedBox(
+                                    width: 8,
+                                    height: 8,
+                                    child: CircularProgressIndicator(strokeWidth: 1.5),
+                                  )
+                                : Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: _isBackendOnline ? KColors.success : KColors.error,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (_isBackendOnline ? KColors.success : KColors.error)
+                                              .withValues(alpha: 0.4),
+                                          blurRadius: 4,
+                                          spreadRadius: 1,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _checkingStatus ? 'Checking...' : (_isBackendOnline ? 'Online' : 'Offline'),
+                          style: context.kHeadlineSM,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _isBackendOnline ? 'Backend cloud active' : 'Offline fallback active',
+                          style: context.kLabelSM.copyWith(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(context.kSpacingMD),
+                    decoration: context.bentoCard,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('MY LIBRARY', style: context.kLabelCaps.copyWith(fontSize: 10)),
+                            Icon(Icons.folder_outlined, color: KColors.primary, size: 14),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '$_historyCount Files',
+                          style: context.kHeadlineSM,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Total conversions done',
+                          style: context.kLabelSM.copyWith(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ).animate().fadeIn(delay: 120.ms),
             const SizedBox(height: 24),
 
             // ── Featured Tools ──
@@ -194,73 +318,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                 ],
               );
             }),
-            const SizedBox(height: 24),
-
-            // ── All Conversion Tools ──
-            Text(
-              'ALL CONVERSION TOOLS',
-              style: context.kLabelCaps,
-            ).animate().fadeIn(delay: 320.ms),
             const SizedBox(height: 12),
-
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: context.gridCount,  // 2 phone / 3 tablet / 4 large
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: context.toolCardRatio,
-              children: [
-                _ToolCard(
-                  title: 'Images → PDF',
-                  subtitle: 'JPG, PNG, WEBP, HEIC',
-                  icon: Icons.image_outlined,
-                  delay: 360,
-                  onTap: () => _navigate(context,
-                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'])),
-                ),
-                _ToolCard(
-                  title: 'Word → PDF',
-                  subtitle: 'DOC, DOCX',
-                  icon: Icons.description_outlined,
-                  delay: 400,
-                  onTap: () => _navigate(context,
-                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['doc', 'docx'])),
-                ),
-                _ToolCard(
-                  title: 'Excel → PDF',
-                  subtitle: 'XLS, XLSX',
-                  icon: Icons.table_chart_outlined,
-                  delay: 440,
-                  onTap: () => _navigate(context,
-                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['xls', 'xlsx'])),
-                ),
-                _ToolCard(
-                  title: 'PPT → PDF',
-                  subtitle: 'PPT, PPTX',
-                  icon: Icons.slideshow_outlined,
-                  delay: 480,
-                  onTap: () => _navigate(context,
-                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['ppt', 'pptx'])),
-                ),
-                _ToolCard(
-                  title: 'Docs → PDF',
-                  subtitle: 'TXT, RTF, HTML, ODT',
-                  icon: Icons.article_outlined,
-                  delay: 520,
-                  onTap: () => _navigate(context,
-                      ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['txt', 'rtf', 'html', 'odt'])),
-                ),
-                _ToolCard(
-                  title: 'Compress',
-                  subtitle: 'JPG, PNG — Quality or Size',
-                  icon: Icons.compress_outlined,
-                  delay: 560,
-                  onTap: () => _navigate(context, const CompressImageScreen()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
 
             // ── Recent Conversions ──
             if (_recentHistory.isNotEmpty) ...[
@@ -303,15 +361,118 @@ class _DashboardTabState extends State<_DashboardTab> {
   }
 }
 
-// ─── Tools Tab (convert picker) ───────────────────────────────────────────────
+
 
 class _ToolsTab extends StatelessWidget {
   const _ToolsTab();
 
+  void _navigate(BuildContext context, Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Opens Convert screen directly from the Tools tab
-    return const ConvertScreen(initialFormat: 'pdf');
+    return SingleChildScrollView(
+      padding: context.kPagePaddingTop(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Toolbox',
+            style: context.kHeadlineXL,
+          ).animate().fadeIn(duration: 400.ms),
+          const SizedBox(height: 4),
+          Text(
+            'Select a specialized tool to start converting',
+            style: context.kBodySM,
+          ).animate().fadeIn(delay: 100.ms),
+          const SizedBox(height: 24),
+
+          // ── Image Tools ──
+          Text(
+            'IMAGE TOOLS',
+            style: context.kLabelCaps,
+          ).animate().fadeIn(delay: 150.ms),
+          const SizedBox(height: 12),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: context.isWideScreen ? 3 : 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: context.toolCardRatio,
+            children: [
+              _ToolCard(
+                title: 'Images → PDF',
+                subtitle: 'JPG, PNG, WEBP, HEIC',
+                icon: Icons.image_outlined,
+                delay: 200,
+                onTap: () => _navigate(context,
+                    ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'])),
+              ),
+              _ToolCard(
+                title: 'Compress Image',
+                subtitle: 'JPG, PNG — Quality/Size',
+                icon: Icons.compress_outlined,
+                delay: 240,
+                onTap: () => _navigate(context, const CompressImageScreen()),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // ── Document Tools ──
+          Text(
+            'DOCUMENT TOOLS',
+            style: context.kLabelCaps,
+          ).animate().fadeIn(delay: 300.ms),
+          const SizedBox(height: 12),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: context.isWideScreen ? 3 : 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: context.toolCardRatio,
+            children: [
+              _ToolCard(
+                title: 'Word → PDF',
+                subtitle: 'DOC, DOCX',
+                icon: Icons.description_outlined,
+                delay: 350,
+                onTap: () => _navigate(context,
+                    ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['doc', 'docx'])),
+              ),
+              _ToolCard(
+                title: 'Excel → PDF',
+                subtitle: 'XLS, XLSX',
+                icon: Icons.table_chart_outlined,
+                delay: 390,
+                onTap: () => _navigate(context,
+                    ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['xls', 'xlsx'])),
+              ),
+              _ToolCard(
+                title: 'PPT → PDF',
+                subtitle: 'PPT, PPTX',
+                icon: Icons.slideshow_outlined,
+                delay: 430,
+                onTap: () => _navigate(context,
+                    ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['ppt', 'pptx'])),
+              ),
+              _ToolCard(
+                title: 'Docs → PDF',
+                subtitle: 'TXT, RTF, HTML, ODT',
+                icon: Icons.article_outlined,
+                delay: 470,
+                onTap: () => _navigate(context,
+                    ConvertScreen(initialFormat: 'pdf', allowedExtensions: ['txt', 'rtf', 'html', 'odt'])),
+              ),
+            ],
+          ),
+          const SizedBox(height: 48), // Padding bottom for floating navigation
+        ],
+      ),
+    );
   }
 }
 
@@ -336,22 +497,11 @@ class _FeaturedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: isDark
-            ? KDecorations.glassCard(
-                shadows: [
-                  BoxShadow(
-                    color: KColors.primary.withValues(alpha: 0.08),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              )
-            : KDecorations.lightCard(),
+        padding: EdgeInsets.all(context.kSpacingMD),
+        decoration: context.bentoCard,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -415,10 +565,8 @@ class _ToolCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: isDark
-            ? KDecorations.glassCard()
-            : KDecorations.lightCard(),
+        padding: EdgeInsets.all(context.kSpacingMD),
+        decoration: context.bentoCard,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -459,11 +607,9 @@ class _HistoryItem extends StatelessWidget {
     final format = (item['targetFormat'] as String? ?? 'pdf').toUpperCase();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: isDark
-          ? KDecorations.glassCard(radius: 14)
-          : KDecorations.lightCard(radius: 14),
+      margin: EdgeInsets.only(bottom: context.kSpacingSM),
+      padding: EdgeInsets.symmetric(horizontal: context.kSpacingMD, vertical: context.kSpacingMD),
+      decoration: context.bentoCard,
       child: Row(
         children: [
           Container(
@@ -507,23 +653,9 @@ class _HistoryItem extends StatelessWidget {
 class _SignInNudge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            KColors.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-            KColors.secondary.withValues(alpha: isDark ? 0.10 : 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: KColors.primary.withValues(alpha: 0.20),
-        ),
-      ),
+      padding: EdgeInsets.all(context.kSpacingMD),
+      decoration: context.bentoCard,
       child: Row(
         children: [
           Icon(Icons.account_circle_outlined, color: KColors.primary, size: 28),

@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    command: ["http", "--domain=${NGROK_DOMAIN}", "api:8080"]
+    command: ["http", "--url=${NGROK_DOMAIN}", "api:8080"]
     depends_on:
       - api
 

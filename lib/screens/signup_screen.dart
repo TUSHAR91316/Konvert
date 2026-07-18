@@ -125,10 +125,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // ── Form Card ──
               Container(
-                padding: const EdgeInsets.all(24),
-                decoration: isDark
-                    ? KDecorations.glassCard(radius: 24)
-                    : KDecorations.lightCard(radius: 24),
+                padding: EdgeInsets.all(context.kSpacingLG),
+                decoration: context.bentoCard.copyWith(
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(

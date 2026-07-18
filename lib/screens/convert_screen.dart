@@ -49,6 +49,15 @@ class _ConvertScreenState extends State<ConvertScreen> {
 
   // No disposables in this screen — no leak
 
+  Future<void> _selectOutputDirectory() async {
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    if (selectedDirectory != null) {
+      setState(() {
+        _outputDirectory = selectedDirectory;
+      });
+    }
+  }
+
   Future<void> _pickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
@@ -90,16 +99,34 @@ class _ConvertScreenState extends State<ConvertScreen> {
         setState(() => _statusMessage = 'Scan complete. Processing...');
       }
 
-      File resultFile;
+      late File resultFile;
       String ext = _selectedFiles.first.path.split('.').last.toLowerCase();
 
       if (['jpg', 'jpeg', 'png', 'webp', 'heic'].contains(ext)) {
         if (_targetFormat != 'pdf') throw Exception('Local conversion only supports PDF output.');
-        setState(() => _statusMessage = 'Merging images locally...');
-        resultFile = await _conversionService.imagesToPdf(
-          _selectedFiles,
-          outputDirPath: _outputDirectory,
-        );
+        
+        bool backendSuccess = false;
+        if (_selectedFiles.length == 1) {
+          try {
+            setState(() => _statusMessage = 'Converting via backend...');
+            resultFile = await _conversionService.convertRemote(
+              _selectedFiles.first,
+              _targetFormat,
+              outputDirPath: _outputDirectory,
+            );
+            backendSuccess = true;
+          } catch (e) {
+            debugPrint("Backend image conversion failed: $e. Falling back to local...");
+          }
+        }
+        
+        if (!backendSuccess) {
+          setState(() => _statusMessage = 'Processing locally...');
+          resultFile = await _conversionService.imagesToPdf(
+            _selectedFiles,
+            outputDirPath: _outputDirectory,
+          );
+        }
       } else if (ext == 'pdf' && _selectedFiles.length > 1) {
         throw 'Multiple PDFs merging is not supported yet.';
       } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'rtf', 'html', 'odt']
@@ -198,9 +225,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
                   duration: const Duration(milliseconds: 200),
                   height: context.uploadZoneHeight,
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? KColors.surfaceContainerLow
-                        : KColors.lightSurfaceContainer,
+                    color: context.sectionBg,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: _selectedFiles.isEmpty
@@ -268,9 +293,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
                       final name = _selectedFiles[index].path.split('/').last;
                       return Container(
                         width: 110,
-                        decoration: isDark
-                            ? KDecorations.glassCard(radius: 12)
-                            : KDecorations.lightCard(radius: 12),
+                        decoration: context.bentoCard,
                         child: Stack(
                           children: [
                             Center(
@@ -385,6 +408,39 @@ class _ConvertScreenState extends State<ConvertScreen> {
                 ),
               ).animate().fadeIn(delay: 280.ms),
 
+              const SizedBox(height: 12),
+
+              // ── Save Location ──
+              _BentoSection(
+                label: 'SAVE LOCATION',
+                child: GestureDetector(
+                  onTap: _selectOutputDirectory,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: context.kSpacingMD, vertical: context.kSpacingMD),
+                    decoration: context.bentoCard,
+                    child: Row(
+                      children: [
+                        Icon(Icons.folder_open_outlined, color: KColors.primary, size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Output Folder', style: context.kHeadlineSM.copyWith(fontSize: 14)),
+                              Text(_outputDirectory ?? 'Default Application Directory',
+                                  style: context.kBodySM,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: KColors.primary, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ).animate().fadeIn(delay: 340.ms),
+
               const SizedBox(height: 24),
 
               // ── Status Message ──
@@ -426,10 +482,8 @@ class _ConvertScreenState extends State<ConvertScreen> {
               // ── Progress ──
               if (_isConverting) ...[
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: isDark
-                      ? KDecorations.glassCard()
-                      : KDecorations.lightCard(),
+                  padding: EdgeInsets.all(context.kSpacingMD),
+                  decoration: context.bentoCard,
                   child: Column(
                     children: [
                       ClipRRect(
@@ -509,10 +563,9 @@ class _BentoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: isDark ? KDecorations.glassCard() : KDecorations.lightCard(),
+      padding: EdgeInsets.all(context.kSpacingMD),
+      decoration: context.bentoCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

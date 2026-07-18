@@ -1,3 +1,6 @@
+import 'package:converter_app/theme/app_colors.dart';
+import 'package:converter_app/theme/app_text_styles.dart';
+import 'package:converter_app/theme/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -15,7 +18,6 @@ class SelfHostingScreen extends StatelessWidget {
             SnackBar(content: Text("Could not open URL: $url")),
           );
         }
-        debugPrint('Could not launch $url');
       }
     } catch (e) {
       if (context != null && context.mounted) {
@@ -23,52 +25,45 @@ class SelfHostingScreen extends StatelessWidget {
           SnackBar(content: Text("Error opening URL: $e")),
         );
       }
-      debugPrint('Error launching URL: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     return Scaffold(
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        title: const Text("Self-Hosted Backend"),
+        title: Text("Self-Hosted Backend", style: context.kHeadlineMD),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: BackButton(
+          color: isDark ? KColors.onSurface : KColors.lightOnSurface,
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, context.kBottomPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
             Container(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue.shade700, Colors.blue.shade500],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(12),
+                gradient: KColors.primaryGradient,
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Self-Hosted Backend Deployment",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: KTextStyles.headlineMD(color: Colors.white),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
                     "Deploy Konvert backend on your infrastructure for complete data privacy. Process documents locally without relying on third-party servers.",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                      height: 1.6,
-                    ),
+                    style: KTextStyles.bodySM(color: Colors.white.withValues(alpha: 0.8)),
                   ),
                 ],
               ),
@@ -86,7 +81,7 @@ class SelfHostingScreen extends StatelessWidget {
               onPressed: () => _launchURL(
                   'https://github.com/TUSHAR91316/Konvert-Website/tree/main/backend', context),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Step 2: Setup Docker
             _buildStep(
@@ -98,7 +93,7 @@ class SelfHostingScreen extends StatelessWidget {
               codeBlock: '''docker build -t converter-backend .
 docker run -d -p 8080:8080 converter-backend''',
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Step 3: Expose with Tunnel
             _buildStep(
@@ -108,12 +103,12 @@ docker run -d -p 8080:8080 converter-backend''',
               description:
                   "Use a tunneling service to expose your local backend globally. Choose from ngrok, Cloudflare Tunnel, or similar providers.",
               codeBlock: '''# ngrok (with static domain)
-ngrok http --domain=your-domain.ngrok-free.app 8080
+ngrok http --url=your-domain.ngrok-free.app 8080
 
 # Cloudflare Tunnel
 cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Step 4: Configure App
             _buildStep(
@@ -127,72 +122,47 @@ cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
             const SizedBox(height: 32),
 
             // Key Features
-            _buildSectionHeader("Key Capabilities"),
+            _buildSectionHeader("Key Capabilities", context),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
+              padding: const EdgeInsets.all(20.0),
+              decoration: context.bentoCard,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCapability(
-                    "Data Privacy",
-                    "All files remain on your infrastructure. No data sent to external services.",
-                  ),
-                  _buildCapability(
-                    "Complete Control",
-                    "Manage server resources, security policies, and access logs independently.",
-                  ),
-                  _buildCapability(
-                    "Zero Hosting Costs",
-                    "Leverage existing hardware and infrastructure. Minimal bandwidth requirements.",
-                  ),
-                  _buildCapability(
-                    "Offline Operation",
-                    "Function entirely within your network without external dependencies.",
-                    isLast: true,
-                  ),
+                  _buildCapability(context, "Data Privacy", "All files remain on your infrastructure. No data sent to external services."),
+                  _buildCapability(context, "Complete Control", "Manage server resources, security policies, and access logs independently."),
+                  _buildCapability(context, "Zero Hosting Costs", "Leverage existing hardware and infrastructure. Minimal bandwidth requirements."),
+                  _buildCapability(context, "Offline Operation", "Function entirely within your network without external dependencies.", isLast: true),
                 ],
               ),
             ),
             const SizedBox(height: 32),
 
             // Supported Formats
-            _buildSectionHeader("Supported Document Formats"),
+            _buildSectionHeader("Supported Document Formats", context),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.shade200),
-              ),
+              padding: const EdgeInsets.all(20.0),
+              decoration: context.bentoCard,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFormatGroup("Documents", ["DOC", "DOCX", "TXT", "RTF", "ODT", "HTML"]),
-                  const SizedBox(height: 12),
-                  _buildFormatGroup("Spreadsheets", ["XLS", "XLSX"]),
-                  const SizedBox(height: 12),
-                  _buildFormatGroup("Presentations", ["PPT", "PPTX"]),
+                  _buildFormatGroup(context, "Documents", ["DOC", "DOCX", "TXT", "RTF", "ODT", "HTML"]),
                   const SizedBox(height: 16),
+                  _buildFormatGroup(context, "Spreadsheets", ["XLS", "XLSX"]),
+                  const SizedBox(height: 16),
+                  _buildFormatGroup(context, "Presentations", ["PPT", "PPTX"]),
+                  const SizedBox(height: 20),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
-                      borderRadius: BorderRadius.circular(6),
+                      color: KColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       "All formats convert to PDF",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.orange,
-                      ),
+                      style: KTextStyles.labelCaps(color: KColors.primary),
                     ),
                   ),
                 ],
@@ -201,31 +171,15 @@ cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
             const SizedBox(height: 32),
 
             // Resources
-            _buildSectionHeader("Resources & Documentation"),
+            _buildSectionHeader("Resources & Documentation", context),
             const SizedBox(height: 16),
-            _buildResourceLink(
-              "GitHub Backend Repository",
-              "https://github.com/TUSHAR91316/Konvert-Website/tree/main/backend",
-              context,
-            ),
-            const SizedBox(height: 8),
-            _buildResourceLink(
-              "ngrok Documentation",
-              "https://ngrok.com/docs",
-              context,
-            ),
-            const SizedBox(height: 8),
-            _buildResourceLink(
-              "Cloudflare Tunnel Guide",
-              "https://developers.cloudflare.com/cloudflare-one/connections/connect-applications/",
-              context,
-            ),
-            const SizedBox(height: 8),
-            _buildResourceLink(
-              "Konvert Official Website",
-              "https://konvert-website.vercel.app/",
-              context,
-            ),
+            _buildResourceLink("GitHub Backend Repository", "https://github.com/TUSHAR91316/Konvert-Website/tree/main/backend", context),
+            const SizedBox(height: 12),
+            _buildResourceLink("ngrok Documentation", "https://ngrok.com/docs", context),
+            const SizedBox(height: 12),
+            _buildResourceLink("Cloudflare Tunnel Guide", "https://developers.cloudflare.com/cloudflare-one/connections/connect-applications/", context),
+            const SizedBox(height: 12),
+            _buildResourceLink("Konvert Official Website", "https://konvert-website.vercel.app/", context),
             const SizedBox(height: 32),
           ],
         ),
@@ -233,15 +187,8 @@ cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Colors.black87,
-      ),
-    );
+  Widget _buildSectionHeader(String title, BuildContext context) {
+    return Text(title, style: context.kHeadlineMD);
   }
 
   Widget _buildStep({
@@ -254,97 +201,74 @@ cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
     String? codeBlock,
     String? highlightText,
   }) {
+    final isDark = context.isDark;
     return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
+      padding: const EdgeInsets.all(20.0),
+      decoration: context.bentoCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: KColors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     number,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                    style: KTextStyles.headlineSM(color: KColors.primary),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
+                child: Text(title, style: context.kHeadlineSM),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            description,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.black54,
-              height: 1.6,
-            ),
-          ),
+          Text(description, style: context.kBodySM),
           if (codeBlock != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.grey.shade900,
-                borderRadius: BorderRadius.circular(6),
+                color: isDark ? KColors.background : KColors.lightSurfaceContainerHigh,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 codeBlock,
                 style: const TextStyle(
-                  color: Colors.green,
-                  fontSize: 11,
+                  color: KColors.success,
+                  fontSize: 12,
                   fontFamily: 'monospace',
                 ),
               ),
             ),
           ],
           if (highlightText != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.blue.shade300),
+                color: KColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: KColors.primary.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info, size: 18, color: Colors.blue.shade700),
-                  const SizedBox(width: 8),
+                  Icon(Icons.info_outline, size: 20, color: KColors.primary),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       highlightText,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blue.shade700,
-                      ),
+                      style: KTextStyles.bodySM(color: KColors.primary)
+                          .copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -352,20 +276,19 @@ cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
             ),
           ],
           if (buttonLabel != null && onPressed != null) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onPressed,
-                icon: const Icon(Icons.link),
-                label: Text(buttonLabel),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: onPressed,
+              child: Container(
+                height: 46,
+                decoration: KDecorations.gradientButton(radius: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.link, color: Colors.white, size: 18),
+                    const SizedBox(width: 8),
+                    Text(buttonLabel, style: KTextStyles.button()),
+                  ],
                 ),
               ),
             ),
@@ -375,142 +298,94 @@ cloudflare tunnel run --url http://localhost:8080 my-tunnel''',
     );
   }
 
-  Widget _buildCapability(String title, String description, {bool isLast = false}) {
+  Widget _buildCapability(BuildContext context, String title, String description, {bool isLast = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
+              margin: const EdgeInsets.only(top: 2),
               width: 20,
               height: 20,
-              decoration: const BoxDecoration(
-                color: Colors.green,
+              decoration: BoxDecoration(
+                color: KColors.success.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Center(
-                child: Text(
-                  "✓",
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
+                child: Icon(Icons.check, size: 14, color: KColors.success),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  Text(title, style: context.kBodyLG),
                   const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                      height: 1.5,
-                    ),
-                  ),
+                  Text(description, style: context.kBodySM),
                 ],
               ),
             ),
           ],
         ),
-        if (!isLast) const SizedBox(height: 12),
+        if (!isLast) const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _buildFormatGroup(String category, List<String> formats) {
-    return Row(
+  Widget _buildFormatGroup(BuildContext context, String category, List<String> formats) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 110,
-          child: Text(
-            category,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: formats
-                .map(
-                  (format) => Chip(
-                    label: Text(format),
-                    backgroundColor: Colors.orange.shade200,
-                    labelStyle: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
+        Text(category, style: context.kBodyLG),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: formats.map((format) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: context.isDark ? KColors.surfaceContainerHigh : KColors.lightSurfaceContainerHigh,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(format, style: context.kLabelSM),
+            );
+          }).toList(),
         ),
       ],
     );
   }
 
   Widget _buildResourceLink(String label, String url, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+    return GestureDetector(
+      onTap: () => _launchURL(url, context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: context.bentoCard,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: KTextStyles.bodySM(color: KColors.primary).copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  Text(
+                    url,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.kLabelSM,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  url,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.open_in_new),
-            iconSize: 18,
-            color: Colors.blue,
-            onPressed: () => _launchURL(url, context),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Icon(Icons.open_in_new, size: 20, color: KColors.primary),
+          ],
+        ),
       ),
     );
   }

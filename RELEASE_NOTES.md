@@ -1,20 +1,33 @@
 # Konvert Release Notes
 
 ## Version 1.6.4
-*Bug Fixes & Stability Updates*
+*Infrastructure, Bug Fixes, & Polish Update*
 
 **Highlights**
-This release focuses entirely on making the app rock-solid. We conducted a deep audit and fixed several major crashes, memory leaks, and added highly detailed error handling so you always know exactly what went wrong during a conversion.
+This release focuses on testing, stability, robust error handling, and file system controls to ensure the application is completely solid and professional.
+
+**New Features & Improvements**
+- 🎨 **Precision Slate UI**: Completely replaced the previous "Obsidian" glassmorphic UI (which had a generic "AI-slop" feel) with a flat, professional design system using clean 1px card outlines, strict 8-point grid alignment, and Slate-inspired colors.
+- 🎨 **Dynamic Accent Colors**: Added fully functional, interactive settings accent color swatches (Indigo, Blue, Emerald, Red) that persist in secure storage and instantly update the entire app's theme at runtime.
+- ⏰ **Time-based Greetings**: Removed cliché waving emojis and "Hello there 👋" placeholders, replaced by clean, professional greetings ("Good morning", "Good afternoon", "Good evening") determined by system time.
+- 🧭 **Structured Navigation**: Organized the bottom navigation into a clean 4-tab layout (Dashboard, Library, Tools, Settings) with a dedicated categorized Toolbox page to separate dashboard activities from conversion tools.
+- 🔄 **Hybrid Image-to-PDF Fallback**: Connected image conversions to the backend with a built-in automated fallback to local on-device PDF conversion if the backend fails or goes offline.
+- 🌟 **Save Location Control**: Added a brand new "Save Location" selector on the Convert Screen so you can easily choose where converted files are downloaded.
+- 🔧 **Under-the-hood Pipeline**: Revamped local testing pipeline with native Git Hooks (`pre-commit` and `pre-push`) to guarantee code quality.
+- 📦 **Dependency Update**: Updated 48 outdated core packages to their latest versions for better performance and security.
+- ✅ **Test Coverage**: Added comprehensive widget and unit tests across the application, including Update Service version checking rules.
+- 🚀 **Auto-Update Notifier Fixes**: Fixed tag parsing to support uppercase 'V' tags (e.g., `V1.6.3`), enabling flawless automatic update prompts.
+- 🎨 **Redesigned Update Alert Dialog**: Polished the update notifier popup with a premium Precision Slate UI design matching the system dark/light colors.
 
 **Robust Error Handling**
 - **Numeric Error Codes**: The app now displays specific Error Codes (e.g., `4001`, `5001`, `5002`) instead of generic "Conversion failed" messages. 
 - **Actionable Resolutions**: Whenever an error occurs, a beautiful dialog box pops up giving you a clear English explanation of why the failure happened, and a "Tip" on how to resolve it.
 
 **Bug Fixes**
-- 🐛 **Fixed Backend Storage Leak**: Deeply corrupted files crashing the self-hosted backend will no longer permanently consume hard drive space. The backend now forcibly cleans up orphaned files on failure.
-- 🐛 **Fixed Out-Of-Memory Crash**: Massive conversions (100MB+) will no longer crash older Android phones. The app now uses a streaming download engine (`dio.download`) to save files directly to the SSD instead of buffering in RAM.
+- 🐛 **Fixed Backend Storage Leak**: Deeply corrupted files crashing the self-hosted backend will no longer permanently consume hard drive space. The backend now cleans up orphaned files on failure.
+- 🐛 **Fixed Out-Of-Memory Crash**: Massive conversions (100MB+) will no longer crash older Android phones. The app now uses a streaming download engine (`dio.download`) to save files directly to the storage instead of buffering in RAM.
 - 🐛 **Fixed VirusTotal Crash**: The app now intelligently checks file size before uploading. If the file exceeds the free VirusTotal 32MB limit, the upload is safely aborted with a friendly warning.
-- 🐛 **Fixed History Sync**: If you delete a PDF locally on your phone via a file manager, the Konvert app now auto-detects this and silently cleans up the broken link from your History log.
+- 🐛 **Fixed History Sync**: If you delete a PDF locally on your phone via a file manager, the Konvert app now auto-detects this and silently cleans up the broken link from your Library log.
 
 ---
 

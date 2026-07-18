@@ -73,7 +73,7 @@ Now that your personal cloud is running securely on the internet, you just need 
 ## 🙋 Frequently Asked Questions
 
 **Does Image-to-PDF conversion require the backend?**
-No! Image conversions (JPG, PNG to PDF) are 100% processed completely offline using your phone's processor. You only need to run the Docker backend when processing heavy documents like Word or Excel files.
+No! While single Image conversions (JPG, PNG to PDF) will attempt to leverage the backend first for cloud-based rendering, if the server is offline or unreachable it automatically and silently falls back to 100% offline processing using your phone's processor. Multiple image merging is always processed completely on-device.
 
 **Do I have to do this every time?**
 You only have to install Docker and set up the `.env` file once! The containers are configured to start automatically if your PC restarts. If you ever manually stop them, simply open terminal and run:

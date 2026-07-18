@@ -10,13 +10,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:converter_app/services/config_service.dart';
 
 class ConversionService {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(minutes: 1),
-      sendTimeout: const Duration(minutes: 5),
-      receiveTimeout: const Duration(minutes: 5),
-    ),
-  );
+  final Dio _dio;
+  final ConfigService _configService;
+
+  ConversionService({Dio? dio, ConfigService? configService})
+      : _dio = dio ?? Dio(
+          BaseOptions(
+            connectTimeout: const Duration(minutes: 1),
+            sendTimeout: const Duration(minutes: 5),
+            receiveTimeout: const Duration(minutes: 5),
+          ),
+        ),
+        _configService = configService ?? ConfigService();
 
   // --- LOCAL CONVERSIONS ---
 
@@ -70,7 +75,7 @@ class ConversionService {
     final outputFile = File("${outputDir.path}/converted_${DateTime.now().millisecondsSinceEpoch}.$targetFormat");
 
     try {
-      final String dynamicBackendUrl = await ConfigService().getBackendUrl();
+      final String dynamicBackendUrl = await _configService.getBackendUrl();
       await _dio.download(
         '$dynamicBackendUrl/convert',
         outputFile.path,

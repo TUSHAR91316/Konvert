@@ -192,9 +192,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: Container(
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: isDark
-                  ? KDecorations.glassCard(radius: 14)
-                  : KDecorations.lightCard(radius: 14),
+              decoration: context.bentoCard,
               child: Row(
                 children: [
                   // ── File type icon ──

@@ -3,19 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-// ─── Konvert Obsidian Theme ───────────────────────────────────────────────────
-// v1.6.3 — Obsidian design system
-// Dark mode: deep obsidian + electric violet
-// Light mode: white/lavender surfaces + violet accent (Inter throughout)
+// ─── Konvert Precision Slate Theme ─────────────────────────────────────────────
+// v1.6.4 — Precision Slate design system
+// Dark mode: deep charcoal + professional indigo
+// Light mode: white/slate surfaces + indigo accent (Inter throughout)
 
 // ── DARK MODE ────────────────────────────────────────────────────────────────
 
-final ThemeData darkmode = ThemeData(
+ThemeData get darkmode => ThemeData(
   useMaterial3: true,
   brightness: Brightness.dark,
   scaffoldBackgroundColor: KColors.background,
 
-  colorScheme: const ColorScheme(
+  colorScheme: ColorScheme(
     brightness: Brightness.dark,
     primary: KColors.primary,
     onPrimary: KColors.onPrimary,
@@ -139,7 +139,7 @@ final ThemeData darkmode = ThemeData(
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: KColors.primary, width: 1.5),
+      borderSide: BorderSide(color: KColors.primary, width: 1.5),
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
   ),
@@ -170,7 +170,7 @@ final ThemeData darkmode = ThemeData(
   ),
 
   // ── Progress Indicator ──
-  progressIndicatorTheme: const ProgressIndicatorThemeData(
+  progressIndicatorTheme: ProgressIndicatorThemeData(
     color: KColors.primary,
     linearTrackColor: KColors.surfaceContainerHigh,
   ),
@@ -204,7 +204,7 @@ final ThemeData darkmode = ThemeData(
 
 // ── LIGHT MODE ───────────────────────────────────────────────────────────────
 
-final ThemeData lightmode = ThemeData(
+ThemeData get lightmode => ThemeData(
   useMaterial3: true,
   brightness: Brightness.light,
   scaffoldBackgroundColor: KColors.lightBackground,
@@ -334,7 +334,7 @@ final ThemeData lightmode = ThemeData(
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: KColors.primary, width: 1.5),
+      borderSide: BorderSide(color: KColors.primary, width: 1.5),
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
   ),
@@ -365,9 +365,9 @@ final ThemeData lightmode = ThemeData(
   ),
 
   // ── Progress Indicator ──
-  progressIndicatorTheme: const ProgressIndicatorThemeData(
+  progressIndicatorTheme: ProgressIndicatorThemeData(
     color: KColors.primary,
-    linearTrackColor: Color(0xFFE8E2FF),
+    linearTrackColor: const Color(0xFFE8E2FF),
   ),
 
   // ── Dialog ──

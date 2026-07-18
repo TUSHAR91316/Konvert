@@ -15,6 +15,14 @@ class KResponsive {
   static const double _phoneMax = 599;
   static const double _tabletMax = 839;
 
+  // ── Grid Spacing (8pt system) ──
+  static const double spacingXS = 4.0;
+  static const double spacingSM = 8.0;
+  static const double spacingMD = 16.0;
+  static const double spacingLG = 24.0;
+  static const double spacingXL = 32.0;
+  static const double spacingXXL = 48.0;
+
   static bool isPhone(BuildContext context) =>
       MediaQuery.sizeOf(context).width <= _phoneMax;
 
@@ -91,6 +99,14 @@ extension KResponsiveContext on BuildContext {
   bool get isTablet => KResponsive.isTablet(this);
   bool get isLargeTablet => KResponsive.isLargeTablet(this);
   bool get isWideScreen => KResponsive.isWideScreen(this);
+
+  // Spacing Constants
+  double get kSpacingXS => KResponsive.spacingXS;
+  double get kSpacingSM => KResponsive.spacingSM;
+  double get kSpacingMD => KResponsive.spacingMD;
+  double get kSpacingLG => KResponsive.spacingLG;
+  double get kSpacingXL => KResponsive.spacingXL;
+  double get kSpacingXXL => KResponsive.spacingXXL;
 
   int get gridCount => KResponsive.gridCount(this);
   double get uploadZoneHeight => KResponsive.uploadZoneHeight(this);

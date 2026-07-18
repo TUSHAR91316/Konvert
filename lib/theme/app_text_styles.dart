@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-// ─── Konvert Obsidian Typography ──────────────────────────────────────────────
+// ─── Konvert 2.0 Professional Typography ───────────────────────────────────────
 // Font: Inter (via google_fonts)
-// Source: UI_IDEA/screen/DESIGN.md — Typography section
+// Theme: Clean Minimalist (Lighter weights, balanced tracking)
 
 class KTextStyles {
   KTextStyles._();
@@ -13,7 +13,7 @@ class KTextStyles {
   static TextStyle headlineXL({Color? color}) => GoogleFonts.inter(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.64, // -0.02em of 32px
+        letterSpacing: -0.64,
         height: 1.2,
         color: color,
       );
@@ -22,12 +22,12 @@ class KTextStyles {
   static TextStyle headlineMD({Color? color}) => GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        letterSpacing: -0.20, // -0.01em of 20px
+        letterSpacing: -0.20,
         height: 1.4,
         color: color,
       );
 
-  // ── Headline SM — 16px, w600 (sub-section headers) ──
+  // ── Headline SM — 16px, w600 ──
   static TextStyle headlineSM({Color? color}) => GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w600,
@@ -45,20 +45,21 @@ class KTextStyles {
         color: color,
       );
 
-  // ── Body SM — 14px, w400 ──
+  // ── Body SM — 14px, w400 (Highly readable secondary text) ──
   static TextStyle bodySM({Color? color}) => GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        letterSpacing: 0,
+        letterSpacing: 0.1,
         height: 1.5,
         color: color,
       );
 
-  // ── Label Caps — 12px, w700, tracking +0.05em, UPPERCASE ──
+  // ── Label Caps — 12px, w600, tracking +0.03em, UPPERCASE ──
+  // Slightly lighter weight and less tracking than before for a cleaner look.
   static TextStyle labelCaps({Color? color}) => GoogleFonts.inter(
         fontSize: 12,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.60, // +0.05em of 12px
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.36, 
         height: 1.0,
         color: color,
       );
@@ -72,19 +73,20 @@ class KTextStyles {
         color: color,
       );
 
-  // ── Logo — gradient "Konvert" wordmark ──
+  // ── Logo — clean wordmark ──
   static TextStyle logo() => GoogleFonts.inter(
         fontSize: 22,
-        fontWeight: FontWeight.w900,
+        fontWeight: FontWeight.w800,
         letterSpacing: -0.44,
         height: 1.0,
       );
 
   // ── Button text ──
+  // 15px, w600: Professional, legible, modern.
   static TextStyle button({Color? color}) => GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.5,
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.2,
         height: 1.0,
         color: color ?? Colors.white,
       );
@@ -116,7 +118,7 @@ extension KTextTheme on BuildContext {
       );
 
   TextStyle get kLabelCaps => KTextStyles.labelCaps(
-        color: KColors.primary.withValues(alpha: 0.85),
+        color: _isDark ? KColors.onSurfaceVariant : KColors.lightOnSurfaceVariant,
       );
 
   TextStyle get kLabelSM => KTextStyles.labelSM(

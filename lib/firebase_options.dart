@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '422589866231',
     projectId: 'file-converter-app-7e11d',
     storageBucket: 'file-converter-app-7e11d.firebasestorage.app',
-    iosBundleId: 'com.example.converterApp',
+    iosBundleId: 'com.konvert',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '422589866231',
     projectId: 'file-converter-app-7e11d',
     storageBucket: 'file-converter-app-7e11d.firebasestorage.app',
-    iosBundleId: 'com.example.converterApp',
+    iosBundleId: 'com.konvert',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

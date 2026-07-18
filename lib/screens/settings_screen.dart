@@ -9,6 +9,7 @@ import 'package:converter_app/theme/responsive.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -39,6 +40,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// ✅ MEMORY LEAK FIX: Both TextEditingControllers are now disposed.
   /// Previously this screen had NO dispose() method at all — both controllers
   /// were leaking every time Settings was opened.
+  Future<void> _updateAccentColor(Color color) async {
+    const storage = FlutterSecureStorage();
+    await storage.write(key: 'accent_color', value: color.toARGB32().toString());
+    KColors.primary = color;
+    accentColorNotifier.value = color;
+  }
+
   @override
   void dispose() {
     _apiKeyController.dispose();
@@ -159,16 +167,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Text('Accent Color', style: context.kBodySM),
                         ),
                         const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            _AccentSwatch(color: KColors.primary, isActive: true),
-                            const SizedBox(width: 12),
-                            _AccentSwatch(color: const Color(0xFF60A5FA), isActive: false),
-                            const SizedBox(width: 12),
-                            _AccentSwatch(color: const Color(0xFF34D399), isActive: false),
-                            const SizedBox(width: 12),
-                            _AccentSwatch(color: const Color(0xFFF87171), isActive: false),
-                          ],
+                         ValueListenableBuilder<Color>(
+                          valueListenable: accentColorNotifier,
+                          builder: (context, activeColor, _) {
+                            return Row(
+                              children: [
+                                _AccentSwatch(
+                                  color: const Color(0xFF4F46E5), // Indigo
+                                  isActive: activeColor.toARGB32() == 0xFF4F46E5,
+                                  onTap: () => _updateAccentColor(const Color(0xFF4F46E5)),
+                                ),
+                                const SizedBox(width: 12),
+                                _AccentSwatch(
+                                  color: const Color(0xFF60A5FA), // Blue
+                                  isActive: activeColor.toARGB32() == 0xFF60A5FA,
+                                  onTap: () => _updateAccentColor(const Color(0xFF60A5FA)),
+                                ),
+                                const SizedBox(width: 12),
+                                _AccentSwatch(
+                                  color: const Color(0xFF34D399), // Emerald
+                                  isActive: activeColor.toARGB32() == 0xFF34D399,
+                                  onTap: () => _updateAccentColor(const Color(0xFF34D399)),
+                                ),
+                                const SizedBox(width: 12),
+                                _AccentSwatch(
+                                  color: const Color(0xFFF87171), // Red
+                                  isActive: activeColor.toARGB32() == 0xFFF87171,
+                                  onTap: () => _updateAccentColor(const Color(0xFFF87171)),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -299,7 +328,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                               const SizedBox(height: 8),
                               ...const [
-                                '• Obsidian UI — new premium dark/light design system',
+                                '• Precision Slate UI — new premium dark/light design system',
                                 '• 4-tab bottom navigation (Dashboard, Library, Tools, Settings)',
                                 '• Date-grouped conversion Library',
                                 '• Memory leak fix in Settings controllers',
@@ -337,10 +366,9 @@ class _BentoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: isDark ? KDecorations.glassCard() : KDecorations.lightCard(),
+      decoration: context.bentoCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -418,23 +446,31 @@ class _AboutRow extends StatelessWidget {
 class _AccentSwatch extends StatelessWidget {
   final Color color;
   final bool isActive;
+  final VoidCallback onTap;
 
-  const _AccentSwatch({required this.color, required this.isActive});
+  const _AccentSwatch({
+    required this.color,
+    required this.isActive,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: isActive
-            ? Border.all(color: Colors.white, width: 2.5)
-            : null,
-        boxShadow: isActive
-            ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8)]
-            : null,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: isActive
+              ? Border.all(color: Colors.white, width: 2.5)
+              : null,
+          boxShadow: isActive
+              ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8)]
+              : null,
+        ),
       ),
     );
   }
