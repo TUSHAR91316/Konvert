@@ -1,5 +1,82 @@
 # Konvert Release Notes
 
+## Version 1.7.0
+*Full Package Upgrade, Auth Modernisation & Build Infrastructure Update*
+
+**Highlights**
+This release upgrades every dependency to its latest available version, modernises the Google Sign-In flow to the new v7 API (Android Credential Manager), bumps the Android build toolchain (Gradle 8.14, AGP 8.11.1, compileSdk 37), and includes all polish and stability improvements originally planned for 1.6.5.
+
+---
+
+**Core Feature Pillars & Architectural Enhancements**
+
+1. 📊 **System Status Telemetry Details**
+   - **Backend Telemetry Endpoint**: Added `psutil` integration to the FastAPI backend (`GET /health/details`) to report real-time CPU %, RAM usage (used/total MB), and free disk space (GB).
+   - **Live Telemetry Bottom Sheet**: Tapping the "SYSTEM STATUS" bento card on the dashboard opens an interactive modal displaying real-time server metrics, CPU/RAM progress bars, network latency ping (e.g. `42ms`), and a manual "Reconnect / Refresh" button.
+
+2. ⚡ **Architectural & Concurrency Fixes**
+   - **Async Backend Subprocess**: Replaced blocking `subprocess.run()` with `asyncio.create_subprocess_exec()` in LibreOffice conversion handlers so heavy document processing never blocks server health checks or telemetry requests.
+   - **Startup Dialog Safety**: Wrapped `UpdateService().checkForUpdate(context)` in `WidgetsBinding.instance.addPostFrameCallback` in `home_screen.dart` to eliminate potential rendering race conditions on cold launch.
+
+3. 🛠️ **Code Audit & Hardcoding Refactors**
+   - **Theme Mode Persistence**: Persisted `ThemeMode` (`light`/`dark`) in `FlutterSecureStorage` across both the Settings toggle and the top navigation bar quick-toggle, ensuring theme choices survive cold app restarts.
+   - **Dynamic Storage Paths**: Replaced hardcoded Android download paths with `path_provider` (`getDownloadsDirectory()` / `getTemporaryDirectory()`) and dynamic user folder pickers for cross-platform compliance.
+   - **Smart Emulator Loopback**: Configured `ConfigService` to auto-detect Android emulator environments and route loopback connections to `10.0.2.2:8080` while retaining `localhost` / ngrok configurations for physical devices.
+   - **Centralized API Constants**: Created `ApiConstants` to manage all external endpoint URLs, network timeout durations (`connectTimeout`, `sendTimeout`, `receiveTimeout`), and file size thresholds.
+
+4. 🧩 **Offline Multi-PDF Merging**
+   - **Hybrid PDF Merging Engine**: Implemented seamless multi-PDF merging in `ConversionService`. Merges process losslessly on the self-hosted backend (`/merge-pdfs`) when connected, and automatically fall back to **100% offline** on-device merging via the `pdf` & `printing` Dart packages when offline or standalone.
+
+5. 🐛 **Bug Fix & UX: In-App Direct Update Downloader & Installer**
+   - **Fixed Unresponsive / External Download Action**: Resolved an issue where tapping "Download Update" did not initiate an in-app download or launch the installer.
+   - **Direct APK Streaming**: Replaced external browser redirects with a built-in streaming downloader (`Dio().download`) directly inside the update dialog, displaying real-time progress (`0%` → `100%`).
+   - **One-Tap Native Installation**: Tapping "Install Update" downloads the `.apk` directly to storage and triggers the native Android package installer prompt via `open_file` — zero manual web browsing or file manager searching required.
+
+---
+
+**Package Upgrades — All Dependencies at Latest**
+Every direct dependency has been audited and upgraded:
+
+| Package | Previous | Now |
+|---|---|---|
+| `google_sign_in` | 6.2.2 | **7.2.0** |
+| `permission_handler` | 12.0.3 | **13.0.0** |
+| `firebase_core` | 4.12.1 | **4.13.0** |
+| `firebase_auth` | 6.5.6 | **6.5.7** |
+| `cloud_firestore` | 6.7.1 | **6.8.0** |
+| `google_fonts` | 6.3.3 | **8.2.1** |
+| `file_picker` | 10.x | **11.0.3** |
+| `open_file` | 3.x | **4.0.0** |
+| `pdf` | 3.12.0 | **3.13.0** |
+| `printing` | 5.14.3 | **5.15.0** |
+| `dio` | 5.10.0 | **5.11.0** |
+| `sqflite` | 2.4.2+1 | **2.4.3** |
+| `flutter_image_compress` | 2.5.0 | **2.5.1** |
+
+---
+
+**Google Sign-In v7 Migration (Android Credential Manager)**
+- Migrated from the deprecated Google Sign-In SDK to the new **Android Credential Manager** backed API (`google_sign_in` v7).
+- `GoogleSignIn()` constructor replaced with `GoogleSignIn.instance` singleton pattern.
+- `signIn()` replaced with `authenticate()` — returns the signed-in account directly with proper cancellation handling via `GoogleSignInException`.
+- Added mandatory `GoogleSignIn.instance.initialize()` + `attemptLightweightAuthentication()` at app startup for seamless silent sign-in restoration for returning users.
+- Authentication tokens now correctly use only `idToken` for Firebase credential (v7 separates authentication from authorization).
+
+---
+
+**Android Build Toolchain & Deprecation Fixes**
+- **Gradle** upgraded from 8.11.1 → **8.14** (eliminates Gradle wrapper deprecation warnings).
+- **Java 17 Toolchain Compatibility**: Upgraded Java source & target compatibility to `JavaVersion.VERSION_17` and `jvmTarget = "17"` in `build.gradle.kts`, completely eliminating obsolete Java 8/11 compiler warnings during release builds.
+- **Android Gradle Plugin (AGP)** set to **8.11.1**.
+- **Kotlin** upgraded to **2.2.20**.
+- **compileSdk** bumped from 36 → **37** (required by `permission_handler` v13 / `permission_handler_android` v14).
+- **Android SDK Platform 37 Fix**: Configured filesystem directory junction (`android-37.0` → `android-37`) resolving Gradle target hash lookup errors.
+- **Transitive Dependencies Audit**: Upgraded 11 locked transitive dependencies (`url_launcher_android` 6.3.32, `objective_c` 9.5.0, `dio_web_adapter` 2.2.1, `package_config` 3.0.0, `vector_graphics` 1.2.3, `jni` 1.0.3, `posix` 6.5.2, etc.) to their latest compatible stable releases while maintaining `win32` 5.15.0 compatibility.
+
+---
+
+
+
 ## Version 1.6.4
 *Infrastructure, Bug Fixes, & Polish Update*
 

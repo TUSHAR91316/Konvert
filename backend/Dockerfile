@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install Python deps
-RUN pip install fastapi uvicorn python-multipart
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 

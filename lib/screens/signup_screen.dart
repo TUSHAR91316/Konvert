@@ -6,7 +6,7 @@ import 'package:converter_app/theme/app_colors.dart';
 import 'package:converter_app/theme/app_text_styles.dart';
 import 'package:converter_app/theme/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

@@ -8,6 +8,7 @@ import 'package:converter_app/theme/responsive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ConvertScreen extends StatefulWidget {
   final String initialFormat;
@@ -42,15 +43,31 @@ class _ConvertScreenState extends State<ConvertScreen> {
   void initState() {
     super.initState();
     _targetFormat = widget.initialFormat;
-    if (Platform.isAndroid) {
-      _outputDirectory = '/storage/emulated/0/Download';
+    _initOutputDirectory();
+  }
+
+  Future<void> _initOutputDirectory() async {
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        final dir = await getDownloadsDirectory();
+        if (dir != null && mounted) {
+          setState(() => _outputDirectory = dir.path);
+          return;
+        }
+      }
+      // Fallback to temporary directory for other platforms
+      final tmp = await getTemporaryDirectory();
+      if (mounted) setState(() => _outputDirectory = tmp.path);
+    } catch (_) {
+      // If path_provider fails, leave _outputDirectory null
+      // (ConversionService falls back to getTemporaryDirectory internally)
     }
   }
 
   // No disposables in this screen — no leak
 
   Future<void> _selectOutputDirectory() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    String? selectedDirectory = await FilePicker.getDirectoryPath();
     if (selectedDirectory != null) {
       setState(() {
         _outputDirectory = selectedDirectory;
@@ -59,7 +76,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
   }
 
   Future<void> _pickFiles() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       allowMultiple: true,
       type: widget.allowedExtensions != null ? FileType.custom : FileType.any,
       allowedExtensions: widget.allowedExtensions,
@@ -128,7 +145,12 @@ class _ConvertScreenState extends State<ConvertScreen> {
           );
         }
       } else if (ext == 'pdf' && _selectedFiles.length > 1) {
-        throw 'Multiple PDFs merging is not supported yet.';
+        // Backend-first merge with offline Dart fallback
+        setState(() => _statusMessage = 'Merging PDFs…');
+        resultFile = await _conversionService.mergePdfs(
+          _selectedFiles,
+          outputDirPath: _outputDirectory,
+        );
       } else if (['docx', 'doc', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'rtf', 'html', 'odt']
           .contains(ext)) {
         setState(() => _statusMessage = 'Converting via backend...');

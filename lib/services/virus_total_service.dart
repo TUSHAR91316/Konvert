@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:converter_app/constants/api_constants.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,7 +12,7 @@ class VirusTotalService {
       : _dio = dio ?? Dio(),
         _storage = storage ?? const FlutterSecureStorage();
 
-  static const String _baseUrl = 'https://www.virustotal.com/api/v3';
+  static const String _baseUrl = ApiConstants.virusTotalBaseUrl;
 
   Future<String?> getApiKey() async {
     return await _storage.read(key: 'vt_api_key');
@@ -49,7 +50,7 @@ class VirusTotalService {
 
     // Free API tier file size limit (32MB)
     final int fileSize = await file.length();
-    if (fileSize > 32 * 1024 * 1024) {
+    if (fileSize > ApiConstants.virusTotalMaxBytes) {
       throw Exception("File exceeds VirusTotal's 32MB limit. Please disable Auto-Scan for large files.");
     }
 

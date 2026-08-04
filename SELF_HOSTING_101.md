@@ -89,27 +89,37 @@ Now that your personal cloud is running securely, point the Konvert app to it.
 
 ---
 
-## 🔍 Step 4: Verify Your Server Status
+## 🔍 Step 4: Verify Your Server Status & Telemetry
 
-You can check if your server is running properly by visiting the health check URL in your web browser:
-`https://fancy-otter-123.ngrok-free.app/health`
+You can check if your server and telemetry system are running properly by visiting the health details URL in your web browser:
+`https://fancy-otter-123.ngrok-free.app/health/details`
 
-It should return a JSON response:
+It should return a live JSON response:
 ```json
-{"status": "ok"}
+{
+  "status": "ok",
+  "cpu_percent": 2.4,
+  "memory_used_mb": 450,
+  "memory_total_mb": 16384,
+  "disk_free_gb": 120
+}
 ```
 
 ---
 
 ## 🛠️ Troubleshooting & FAQs
 
-### Port 8080 is already in use
-If another application on your computer is using port 8080, the container will fail to start. Open `docker-compose.yml` and change the port mapping:
-```yaml
-ports:
-  - "9090:8080" # Map host port 9090 to container port 8080
+### Port 8080 is already in use (`Bind for 0.0.0.0:8080 failed`)
+If you previously ran a standalone Docker container (`konvert-backend`), it will hold port 8080 and prevent `docker-compose` from binding:
+```bash
+# Stop and remove the standalone container
+docker stop konvert-backend
+docker rm konvert-backend
+
+# Start the Docker Compose stack (API + Ngrok)
+docker-compose up -d --build
 ```
-Update your Ngrok command/config to tunnel port `9090` instead of `8080`.
+Alternatively, open `docker-compose.yml` and change the host port mapping (`9090:8080`).
 
 ### Ngrok Browser Warning Page
 When accessing the tunnel via a browser, Ngrok displays a warning page. **Don't worry:** the Konvert mobile client automatically sends a custom header `ngrok-skip-browser-warning` to bypass this warning and communicate with the API directly.

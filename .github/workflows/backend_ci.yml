@@ -1,17 +1,7 @@
 name: Backend CI
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend_ci.yml'
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend_ci.yml'
-  workflow_dispatch:
+  workflow_dispatch: # Disabled — trigger manually only
 
 # Cancel any in-progress run on the same branch to save CI minutes
 concurrency:

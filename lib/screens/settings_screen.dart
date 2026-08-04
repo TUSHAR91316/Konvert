@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   bool _isLoading = true;
   bool _autoScanEnabled = false;
-  String _appVersion = '1.6.3';
+  String _appVersion = '';
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final info = await PackageInfo.fromPlatform();
       _appVersion = info.version;
     } catch (_) {
-      _appVersion = '1.6.3';
+      _appVersion = '';
     }
 
     if (mounted) setState(() => _isLoading = false);
@@ -148,9 +148,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             valueListenable: themeNotifier,
                             builder: (_, mode, ctx) => Switch(
                               value: mode == ThemeMode.dark,
-                              onChanged: (val) {
-                                themeNotifier.value =
-                                    val ? ThemeMode.dark : ThemeMode.light;
+                              onChanged: (val) async {
+                                final newMode = val ? ThemeMode.dark : ThemeMode.light;
+                                themeNotifier.value = newMode;
+                                const storage = FlutterSecureStorage();
+                                await storage.write(key: 'theme_mode', value: val ? 'dark' : 'light');
                               },
                             ),
                           ),
@@ -328,10 +330,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                               const SizedBox(height: 8),
                               ...const [
-                                '• Precision Slate UI — new premium dark/light design system',
-                                '• 4-tab bottom navigation (Dashboard, Library, Tools, Settings)',
-                                '• Date-grouped conversion Library',
-                                '• Memory leak fix in Settings controllers',
+                                '• Google Sign-In v7 — Android Credential Manager API',
+                                '• System Status Telemetry — Live CPU %, RAM & Latency stats',
+                                '• Direct In-App Update Downloader & One-Tap Installer',
+                                '• Hybrid PDF Merging — Lossless online & 100% offline fallback',
+                                '• All core packages upgraded to latest versions',
                               ].map((s) => Padding(
                                     padding: const EdgeInsets.only(bottom: 4),
                                     child: Text(s,

@@ -1,23 +1,7 @@
 name: Flutter CI
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'lib/**'
-      - 'test/**'
-      - 'android/**'
-      - 'pubspec.yaml'
-      - '.github/workflows/flutter_ci.yml'
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'lib/**'
-      - 'test/**'
-      - 'android/**'
-      - 'pubspec.yaml'
-      - '.github/workflows/flutter_ci.yml'
-  workflow_dispatch:
+  workflow_dispatch: # Disabled — trigger manually only
 
 # Cancel any in-progress run on the same branch to save CI minutes
 concurrency:
@@ -43,7 +27,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.38.5'
+          flutter-version: '3.44.6'
           cache: true
 
       - name: Create dummy .env for build

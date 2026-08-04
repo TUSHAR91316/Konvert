@@ -3,6 +3,7 @@ import 'package:converter_app/screens/convert_screen.dart';
 import 'package:converter_app/screens/history_screen.dart';
 import 'package:converter_app/screens/settings_screen.dart';
 import 'package:converter_app/screens/signin_screen.dart';
+import 'package:converter_app/services/config_service.dart';
 import 'package:converter_app/services/history_service.dart';
 import 'package:converter_app/services/update_service.dart';
 import 'package:converter_app/theme/app_colors.dart';
@@ -10,13 +11,14 @@ import 'package:converter_app/theme/app_text_styles.dart';
 import 'package:converter_app/theme/responsive.dart';
 import 'package:converter_app/widgets/konvert_bottom_nav.dart';
 import 'package:converter_app/widgets/konvert_top_bar.dart';
+import 'package:converter_app/constants/api_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:converter_app/main.dart';
 import 'package:dio/dio.dart';
-import 'package:converter_app/services/config_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,7 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _requestPermissions();
-    UpdateService().checkForUpdate(context);
+    // Defer the update dialog until after the widget is fully mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) UpdateService().checkForUpdate(context);
+    });
   }
 
   Future<void> _requestPermissions() async {
@@ -71,10 +76,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: KColors.onSurfaceVariant,
                     size: 20,
                   ),
-                  onPressed: () {
-                    themeNotifier.value = themeNotifier.value == ThemeMode.light
+                  onPressed: () async {
+                    final newMode = themeNotifier.value == ThemeMode.light
                         ? ThemeMode.dark
                         : ThemeMode.light;
+                    themeNotifier.value = newMode;
+                    // Persist so the choice survives a cold restart
+                    const storage = FlutterSecureStorage();
+                    await storage.write(
+                      key: 'theme_mode',
+                      value: newMode == ThemeMode.dark ? 'dark' : 'light',
+                    );
                   },
                 ),
               )
@@ -119,7 +131,7 @@ class _DashboardTabState extends State<_DashboardTab> {
     try {
       final backendUrl = await ConfigService().getBackendUrl();
       debugPrint('Checking backend status at: $backendUrl/health');
-      final response = await Dio().get('$backendUrl/health').timeout(const Duration(seconds: 4));
+      final response = await Dio().get('$backendUrl/health').timeout(ApiConstants.healthCheckTimeout);
       debugPrint('Backend response: ${response.statusCode}');
       if (mounted) {
         setState(() {
@@ -155,6 +167,23 @@ class _DashboardTabState extends State<_DashboardTab> {
     return 'Good evening';
   }
 
+  /// Shows a bottom sheet with live server health details and a refresh button.
+  void _showTelemetrySheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TelemetrySheet(
+        isOnline: _isBackendOnline,
+        isChecking: _checkingStatus,
+        onRefresh: () {
+          Navigator.pop(context);
+          _checkSystemStatus();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -186,51 +215,54 @@ class _DashboardTabState extends State<_DashboardTab> {
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(context.kSpacingMD),
-                    decoration: context.bentoCard,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('SYSTEM STATUS', style: context.kLabelCaps.copyWith(fontSize: 10)),
-                            _checkingStatus
-                                ? const SizedBox(
-                                    width: 8,
-                                    height: 8,
-                                    child: CircularProgressIndicator(strokeWidth: 1.5),
-                                  )
-                                : Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: _isBackendOnline ? KColors.success : KColors.error,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: (_isBackendOnline ? KColors.success : KColors.error)
-                                              .withValues(alpha: 0.4),
-                                          blurRadius: 4,
-                                          spreadRadius: 1,
-                                        )
-                                      ],
+                  child: GestureDetector(
+                    onTap: () => _showTelemetrySheet(context),
+                    child: Container(
+                      padding: EdgeInsets.all(context.kSpacingMD),
+                      decoration: context.bentoCard,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('SYSTEM STATUS', style: context.kLabelCaps.copyWith(fontSize: 10)),
+                              _checkingStatus
+                                  ? const SizedBox(
+                                      width: 8,
+                                      height: 8,
+                                      child: CircularProgressIndicator(strokeWidth: 1.5),
+                                    )
+                                  : Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: _isBackendOnline ? KColors.success : KColors.error,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: (_isBackendOnline ? KColors.success : KColors.error)
+                                                .withValues(alpha: 0.4),
+                                            blurRadius: 4,
+                                            spreadRadius: 1,
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _checkingStatus ? 'Checking...' : (_isBackendOnline ? 'Online' : 'Offline'),
-                          style: context.kHeadlineSM,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _isBackendOnline ? 'Backend cloud active' : 'Offline fallback active',
-                          style: context.kLabelSM.copyWith(fontSize: 10),
-                        ),
-                      ],
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _checkingStatus ? 'Checking...' : (_isBackendOnline ? 'Online' : 'Offline'),
+                            style: context.kHeadlineSM,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _isBackendOnline ? 'Tap for details' : 'Tap to retry',
+                            style: context.kLabelSM.copyWith(fontSize: 10),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -686,3 +718,324 @@ class _SignInNudge extends StatelessWidget {
     );
   }
 }
+
+// ─── Telemetry Bottom Sheet ───────────────────────────────────────────────────
+
+class _TelemetrySheet extends StatefulWidget {
+  final bool isOnline;
+  final bool isChecking;
+  final VoidCallback onRefresh;
+
+  const _TelemetrySheet({
+    required this.isOnline,
+    required this.isChecking,
+    required this.onRefresh,
+  });
+
+  @override
+  State<_TelemetrySheet> createState() => _TelemetrySheetState();
+}
+
+class _TelemetrySheetState extends State<_TelemetrySheet> {
+  bool _loadingDetails = false;
+  double? _cpuPercent;
+  int? _memUsedMb;
+  int? _memTotalMb;
+  int? _diskFreeGb;
+  int? _latencyMs;
+  String? _detailError;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isOnline) _fetchDetails();
+  }
+
+  Future<void> _fetchDetails() async {
+    if (!mounted) return;
+    setState(() {
+      _loadingDetails = true;
+      _detailError = null;
+    });
+    try {
+      final backendUrl = await ConfigService().getBackendUrl();
+      final start = DateTime.now();
+      final response = await Dio().get(
+        '$backendUrl/health/details',
+        options: Options(sendTimeout: ApiConstants.healthCheckTimeout, receiveTimeout: ApiConstants.healthCheckTimeout),
+      );
+      final latency = DateTime.now().difference(start).inMilliseconds;
+      if (mounted && response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        setState(() {
+          _latencyMs = latency;
+          _cpuPercent = (data['cpu_percent'] as num?)?.toDouble();
+          _memUsedMb = (data['memory_used_mb'] as num?)?.toInt();
+          _memTotalMb = (data['memory_total_mb'] as num?)?.toInt();
+          _diskFreeGb = (data['disk_free_gb'] as num?)?.toInt();
+          _loadingDetails = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() { _loadingDetails = false; _detailError = 'Could not load metrics'; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final memPercent = (_memUsedMb != null && _memTotalMb != null && _memTotalMb! > 0)
+        ? _memUsedMb! / _memTotalMb!
+        : null;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? KColors.outline : KColors.lightOutline,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ──
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: KColors.primaryGradientVertical,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.monitor_heart_outlined, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Server Status', style: context.kHeadlineSM),
+                    Text('Self-Hosted Backend', style: context.kLabelSM.copyWith(fontSize: 10)),
+                  ],
+                ),
+                const Spacer(),
+                // Latency badge
+                if (_latencyMs != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: KColors.success.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: KColors.success.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      '${_latencyMs}ms',
+                      style: context.kLabelSM.copyWith(color: KColors.success, fontWeight: FontWeight.w700, fontSize: 11),
+                    ),
+                  )
+                else
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: widget.isChecking
+                          ? KColors.onSurfaceVariant
+                          : (widget.isOnline ? KColors.success : KColors.error),
+                      shape: BoxShape.circle,
+                      boxShadow: widget.isChecking
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: (widget.isOnline ? KColors.success : KColors.error).withValues(alpha: 0.4),
+                                blurRadius: 6,
+                                spreadRadius: 2,
+                              )
+                            ],
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Divider(
+              color: isDark ? KColors.outline.withValues(alpha: 0.5) : KColors.lightOutline.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Connection & Mode rows ──
+            _TelemetryRow(
+              icon: Icons.cloud_outlined,
+              label: 'Connection',
+              value: widget.isChecking ? 'Checking...' : (widget.isOnline ? 'Online' : 'Offline'),
+              valueColor: widget.isChecking ? null : (widget.isOnline ? KColors.success : KColors.error),
+            ),
+            const SizedBox(height: 12),
+            _TelemetryRow(
+              icon: Icons.swap_horiz_rounded,
+              label: 'Mode',
+              value: widget.isOnline ? 'Remote (Docker)' : 'Local Fallback',
+            ),
+            const SizedBox(height: 12),
+            _TelemetryRow(
+              icon: Icons.shield_outlined,
+              label: 'Images',
+              value: '100% Offline · No upload',
+              valueColor: KColors.success,
+            ),
+
+            // ── Live Telemetry Metrics (only when online) ──
+            if (widget.isOnline) ...[
+              const SizedBox(height: 16),
+              Divider(
+                color: isDark ? KColors.outline.withValues(alpha: 0.5) : KColors.lightOutline.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 14),
+              if (_loadingDetails)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                )
+              else if (_detailError != null)
+                Center(child: Text(_detailError!, style: context.kLabelSM.copyWith(color: KColors.error)))
+              else ...[
+                // CPU
+                if (_cpuPercent != null) ...[
+                  _TelemetryRow(
+                    icon: Icons.memory_rounded,
+                    label: 'CPU',
+                    value: '${_cpuPercent!.toStringAsFixed(1)}%',
+                    valueColor: _cpuPercent! > 80 ? KColors.error : (_cpuPercent! > 50 ? Colors.orange : KColors.success),
+                    progress: _cpuPercent! / 100,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                // RAM
+                if (memPercent != null) ...[
+                  _TelemetryRow(
+                    icon: Icons.storage_rounded,
+                    label: 'RAM',
+                    value: '$_memUsedMb / $_memTotalMb MB',
+                    valueColor: memPercent > 0.85 ? KColors.error : (memPercent > 0.65 ? Colors.orange : KColors.success),
+                    progress: memPercent,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                // Disk
+                if (_diskFreeGb != null)
+                  _TelemetryRow(
+                    icon: Icons.disc_full_outlined,
+                    label: 'Disk Free',
+                    value: '$_diskFreeGb GB',
+                    valueColor: _diskFreeGb! < 2 ? KColors.error : KColors.success,
+                  ),
+              ],
+            ],
+
+            const SizedBox(height: 20),
+
+            // ── Info box ──
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: KColors.primary.withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: KColors.primary.withValues(alpha: 0.15)),
+              ),
+              child: Text(
+                widget.isOnline
+                    ? 'Your backend is reachable. Complex documents (DOCX, XLSX, PPTX) will be converted via your self-hosted Docker server.'
+                    : 'Backend is offline. Image → PDF conversions still work 100% locally. Start your Docker container and tap Reconnect.',
+                style: context.kBodySM.copyWith(height: 1.5),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Reconnect / Refresh button ──
+            GestureDetector(
+              onTap: onRefresh,
+              child: Container(
+                height: 46,
+                width: double.infinity,
+                decoration: KDecorations.gradientButton(radius: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.refresh_rounded, color: Colors.white, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.isOnline ? 'REFRESH STATUS' : 'RECONNECT',
+                      style: KTextStyles.button(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void onRefresh() => widget.onRefresh();
+}
+
+class _TelemetryRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final double? progress; // 0.0–1.0, shows a progress bar when not null
+
+  const _TelemetryRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.progress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 16, color: KColors.onSurfaceVariant),
+            const SizedBox(width: 10),
+            Text(label, style: context.kBodySM),
+            const Spacer(),
+            Text(
+              value,
+              style: context.kBodySM.copyWith(
+                fontWeight: FontWeight.w600,
+                color: valueColor,
+              ),
+            ),
+          ],
+        ),
+        if (progress != null) ...[
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress!.clamp(0.0, 1.0),
+              minHeight: 4,
+              backgroundColor: KColors.outline.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                valueColor ?? KColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+

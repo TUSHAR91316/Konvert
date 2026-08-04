@@ -40,7 +40,7 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   }
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.image,
     );
     if (result != null) {
@@ -54,7 +54,7 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   }
 
   Future<void> _pickDirectory() async {
-    String? dir = await FilePicker.platform.getDirectoryPath();
+    String? dir = await FilePicker.getDirectoryPath();
     if (dir != null) setState(() => _outputDirectory = dir);
   }
 

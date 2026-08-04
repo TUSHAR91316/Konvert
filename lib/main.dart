@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:converter_app/firebase_options.dart';
 import 'package:converter_app/theme/theme.dart';
 import 'package:converter_app/theme/app_colors.dart';
@@ -6,6 +7,7 @@ import 'package:converter_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
 final accentColorNotifier = ValueNotifier<Color>(const Color(0xFF4F46E5));
@@ -17,6 +19,17 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Initialize google_sign_in v7 singleton — must be called once at startup.
+  // Attempt lightweight (silent) authentication so returning users are signed
+  // in automatically without showing the account picker.
+  unawaited(
+    GoogleSignIn.instance.initialize().then((_) {
+      GoogleSignIn.instance.attemptLightweightAuthentication();
+    }).catchError((e) {
+      debugPrint('GoogleSignIn init error: $e');
+    }),
+  );
+
   const storage = FlutterSecureStorage();
   final savedColor = await storage.read(key: 'accent_color');
   if (savedColor != null) {
@@ -25,6 +38,15 @@ void main() async {
       final color = Color(value);
       KColors.primary = color;
       accentColorNotifier.value = color;
+    }
+  }
+
+  final savedTheme = await storage.read(key: 'theme_mode');
+  if (savedTheme != null) {
+    if (savedTheme == 'dark') {
+      themeNotifier.value = ThemeMode.dark;
+    } else if (savedTheme == 'light') {
+      themeNotifier.value = ThemeMode.light;
     }
   }
 

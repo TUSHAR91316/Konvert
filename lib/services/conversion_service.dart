@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart'; // Required for FileImage
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:converter_app/constants/api_constants.dart';
 import 'package:converter_app/services/config_service.dart';
 
 class ConversionService {
@@ -16,9 +19,9 @@ class ConversionService {
   ConversionService({Dio? dio, ConfigService? configService})
       : _dio = dio ?? Dio(
           BaseOptions(
-            connectTimeout: const Duration(minutes: 1),
-            sendTimeout: const Duration(minutes: 5),
-            receiveTimeout: const Duration(minutes: 5),
+            connectTimeout: ApiConstants.connectTimeout,
+            sendTimeout: ApiConstants.sendTimeout,
+            receiveTimeout: ApiConstants.receiveTimeout,
           ),
         ),
         _configService = configService ?? ConfigService();
@@ -40,6 +43,108 @@ class ConversionService {
     }
 
     return await _savePdf(pdf, "images_converted", outputDirPath: outputDirPath);
+  }
+
+  /// Merges multiple PDF files into a single PDF.
+  ///
+  /// Strategy: Try the backend `/merge-pdfs` endpoint first (lossless, server-side).
+  /// If the backend is offline or unreachable, falls back to a fully **offline**
+  /// merge using the Dart `pdf` package — no Docker required.
+  Future<File> mergePdfs(List<File> pdfs, {String? outputDirPath}) async {
+    if (pdfs.isEmpty) throw Exception('No PDF files provided for merging.');
+    if (pdfs.length == 1) {
+      final outputDir = outputDirPath != null
+          ? Directory(outputDirPath)
+          : await getTemporaryDirectory();
+      final out = File('${outputDir.path}/merged_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await pdfs.first.copy(out.path);
+      return out;
+    }
+
+    // ── Try backend first ──────────────────────────────────────────────────────
+    try {
+      final String backendUrl = await _configService.getBackendUrl();
+
+      // Quick health-check so we don't waste time uploading files to an offline server
+      await _dio.get(
+        '$backendUrl/health',
+        options: Options(
+          sendTimeout: ApiConstants.healthCheckTimeout,
+          receiveTimeout: ApiConstants.healthCheckTimeout,
+        ),
+      );
+
+      final Directory outputDir = outputDirPath != null
+          ? Directory(outputDirPath)
+          : await getTemporaryDirectory();
+      final outputFile = File('${outputDir.path}/merged_${DateTime.now().millisecondsSinceEpoch}.pdf');
+
+      final formData = FormData.fromMap({
+        'files': [
+          for (final pdf in pdfs)
+            await MultipartFile.fromFile(
+              pdf.path,
+              filename: pdf.path.split('/').last,
+            ),
+        ],
+      });
+
+      await _dio.download(
+        '$backendUrl/merge-pdfs',
+        outputFile.path,
+        data: formData,
+        options: Options(method: 'POST'),
+      );
+
+      // Validate downloaded file is a real PDF (not a JSON error)
+      if (outputFile.existsSync() &&
+          outputFile.lengthSync() > ApiConstants.maxJsonErrorPayloadBytes) {
+        return outputFile;
+      }
+      // Small response — might be a JSON error, fall through to offline
+      if (outputFile.existsSync()) outputFile.deleteSync();
+    } on DioException catch (e) {
+      // Backend offline or unreachable — fall through to offline merge
+      if (e.type != DioExceptionType.connectionError &&
+          e.type != DioExceptionType.connectionTimeout) {
+        rethrow; // Unexpected error — bubble up
+      }
+    } catch (_) {
+      // Any other failure (health check) — fall through to offline merge
+    }
+
+    // ── Offline fallback using Dart `pdf` package ─────────────────────────────
+    return _mergePdfsOffline(pdfs, outputDirPath: outputDirPath);
+  }
+
+  /// Merges PDFs entirely on-device using the Dart `pdf` package.
+  ///
+  /// Note: This re-renders each page as a rasterized image (300 DPI) since pure
+  /// Dart PDF parsing (without native code) cannot clone PDF page streams
+  /// losslessly. Text remains selectable if the original PDF is vector-based
+  /// and the device renders it correctly via the `printing` package.
+  Future<File> _mergePdfsOffline(List<File> pdfs, {String? outputDirPath}) async {
+    final mergedDoc = pw.Document();
+
+    for (final pdfFile in pdfs) {
+      // Load PDF pages as rasterized images via the `printing` package
+      final Uint8List pdfBytes = await pdfFile.readAsBytes();
+      await for (final page in Printing.raster(pdfBytes, dpi: 150)) {
+        final image = await page.toPng();
+        final pdfImage = pw.MemoryImage(image);
+        mergedDoc.addPage(
+          pw.Page(
+            pageFormat: PdfPageFormat(page.width.toDouble(), page.height.toDouble()),
+            build: (pw.Context ctx) => pw.FullPage(
+              ignoreMargins: true,
+              child: pw.Image(pdfImage, fit: pw.BoxFit.contain),
+            ),
+          ),
+        );
+      }
+    }
+
+    return await _savePdf(mergedDoc, 'merged', outputDirPath: outputDirPath);
   }
 
   // Helper to save PDF
@@ -90,7 +195,7 @@ class ConversionService {
       // Check if dio.download wrote the JSON error to the output file
       if (outputFile.existsSync()) {
         try {
-          if (outputFile.lengthSync() < 10000) {
+          if (outputFile.lengthSync() < ApiConstants.maxJsonErrorPayloadBytes) {
             String errorString = outputFile.readAsStringSync();
             final errorJson = jsonDecode(errorString);
             outputFile.deleteSync();

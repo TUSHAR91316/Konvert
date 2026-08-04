@@ -18,7 +18,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    command: ["http", "--url=${NGROK_DOMAIN}", "api:8080"]
+    command: ["http", "--url=${NGROK_DOMAIN}", "host.docker.internal:8080"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - api
-
