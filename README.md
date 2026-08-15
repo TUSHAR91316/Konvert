@@ -11,11 +11,14 @@
   <a href="https://www.amazon.in/PrivateByte-Labs-Konvert/dp/B0GDRZLHZ7/">
     <img src="https://img.shields.io/badge/Get_it_on-Amazon_Appstore-orange?style=for-the-badge&logo=amazon" alt="Available on Amazon Appstore">
   </a>
+  <a href="ARCHITECTURE.md">
+    <img src="https://img.shields.io/badge/System-Architecture-8A2BE2?style=for-the-badge&logo=diagramsdotnet" alt="System Architecture">
+  </a>
 </p>
 
 <p align="center">
-  <img src="https://github.com/TUSHAR91316/converter_app/actions/workflows/flutter_ci.yml/badge.svg?branch=main" alt="Flutter CI">
-  <img src="https://github.com/TUSHAR91316/converter_app/actions/workflows/backend_ci.yml/badge.svg?branch=main" alt="Backend CI">
+  <img src="https://github.com/TUSHAR91316/Konvert/actions/workflows/flutter_ci.yml/badge.svg?branch=main" alt="Flutter CI">
+  <img src="https://github.com/TUSHAR91316/Konvert/actions/workflows/backend_ci.yml/badge.svg?branch=main" alt="Backend CI">
 </p>
 
 Konvert is a hybrid, secure, and powerful mobile application designed to handle file conversions and compression with a focus on **User Privacy** and **Security**. Unlike typical web tools, Konvert processes sensitive files (like Images) locally on your device whenever possible.
@@ -63,6 +66,42 @@ Why download Konvert? It offers a **Hybrid** advantage:
 | **Ads** | **Ad-Free** experience. | **Cluttered**: Full of ads/popups. |
 
 > **Note**: Document conversion (DOCX, PPTX) requires an internet connection to reach our secure helper backend. Image tools work completely offline.
+
+---
+
+## 🏗️ System Architecture
+
+Konvert uses a **Fail-Safe Hybrid Architecture** where lightweight operations run 100% locally on the device, while complex office document rendering and lossless merges are handled by a private, self-hosted Docker microservice exposed through an encrypted Ngrok tunnel:
+
+```mermaid
+graph LR
+    subgraph Device["📱 Flutter Client"]
+        ClientApp["Konvert App"]
+        OfflineEngine["⚡ On-Device Engine\n(Dart pdf / Image Compress)"]
+        SQLiteDB["💾 SQLite History"]
+    end
+    
+    subgraph Ingress["🌐 Ngrok Edge"]
+        NgrokTunnel["HTTPS Static Tunnel\n(*.ngrok-free.dev)"]
+    end
+    
+    subgraph SelfHosted["🐳 Docker Microservice"]
+        FastAPIServer["FastAPI REST (:8080)"]
+        LibreHeadless["LibreOffice Headless"]
+        PyPDFMerger["pypdf Merger"]
+        PsutilMonitor["psutil Telemetry"]
+    end
+
+    ClientApp --> OfflineEngine
+    ClientApp --> SQLiteDB
+    ClientApp -- "GET /health/details\nPOST /convert" --> NgrokTunnel
+    NgrokTunnel --> FastAPIServer
+    FastAPIServer --> LibreHeadless
+    FastAPIServer --> PyPDFMerger
+    FastAPIServer --> PsutilMonitor
+```
+
+> 📖 **Deep Dive Documentation**: For sequence diagrams, network topologies, telemetry lifecycles, and security models, see the full **[ARCHITECTURE.md](ARCHITECTURE.md)** document.
 
 ---
 
