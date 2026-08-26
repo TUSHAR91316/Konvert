@@ -43,10 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-. e n v 
- 
- 
+# Environment & Secrets
+.env
 **/.env
+*.bak
+*.tmp
+*~
 
 # Android Signing Keys (NEVER commit these — keep offline backup!)
 android/key.properties
