@@ -63,5 +63,5 @@ backend.zip
 # AI and Workflow Context (local only — never commit)
 .ai/
 CHAT.md
-
+PROJECT_CONTEXT.md
 ROADMAP.md
