@@ -1,0 +1,78 @@
+name: 🐳 Self-Hosting & Docker Backend Issue
+description: Report an issue related to running the Docker backend, LibreOffice, or Ngrok tunnel
+title: "[Self-Hosting]: "
+labels: ["backend", "docker", "ngrok"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please consult the [SELF_HOSTING_101.md](https://github.com/TUSHAR91316/Konvert/blob/main/SELF_HOSTING_101.md) guide before submitting this issue.
+
+  - type: dropdown
+    id: host_os
+    attributes:
+      label: Host Server OS
+      options:
+        - "Windows 11 / 10 (Docker Desktop)"
+        - "Ubuntu / Debian Linux (Docker Engine)"
+        - "Arch Linux / Fedora"
+        - "macOS (Apple Silicon / Intel)"
+        - "Cloud VPS / VM (AWS, DigitalOcean, Hetzner)"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: docker_setup
+    attributes:
+      label: Backend Setup Method
+      options:
+        - "Docker Compose (api + ngrok stack)"
+        - "Manual Docker Run (backend-api only)"
+        - "Bare Metal Python (FastAPI + LibreOffice local install)"
+    validations:
+      required: true
+
+  - type: input
+    id: ngrok_domain_type
+    attributes:
+      label: Tunnel / Backend URL Type
+      description: e.g. Free Static Domain (*.ngrok-free.app / *.ngrok-free.dev) or Local IP (192.168.x.x:8080)
+      placeholder: "e.g. *.ngrok-free.app or localhost:8080"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Description of the Backend Problem
+      placeholder: "When starting docker-compose up, ngrok fails with error..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: curl_output
+    attributes:
+      label: Health Endpoint Test Output
+      description: |
+        Paste output from running:
+        `curl -H "ngrok-skip-browser-warning: true" https://<your-ngrok-domain>/health/details`
+      placeholder: '{"status": "ok", ...} or error message'
+      render: shell
+
+  - type: textarea
+    id: docker_logs
+    attributes:
+      label: Docker Container Logs
+      description: Output from `docker logs backend-api-1` and `docker logs backend-ngrok-1`
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-Submission Checks
+      options:
+        - label: I added `ngrok-skip-browser-warning: true` header when testing via curl/browser.
+          required: true
+        - label: I verified my `NGROK_AUTHTOKEN` and `NGROK_DOMAIN` in the `.env` file.
+          required: true

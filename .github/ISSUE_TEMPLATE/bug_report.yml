@@ -1,0 +1,108 @@
+name: 🐛 Bug Report
+description: Report a bug, crash, or unexpected behavior in the Konvert app
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this bug! Please provide as much detail as possible to help us reproduce and fix it.
+  
+  - type: dropdown
+    id: version
+    attributes:
+      label: Konvert App Version
+      description: What version of Konvert are you using? (Check in Settings -> About)
+      options:
+        - "v1.7.0+13"
+        - "v1.6.4"
+        - "v1.6.2"
+        - "Other / Local Build"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating System / Platform
+      options:
+        - "Android (Phone/Tablet)"
+        - "Windows Desktop"
+        - "macOS"
+        - "Linux"
+        - "Web"
+    validations:
+      required: true
+
+  - type: input
+    id: os_version
+    attributes:
+      label: OS Version & Device Model
+      description: e.g., Android 14 (Samsung Galaxy S23) or Windows 11 23H2
+      placeholder: "e.g., Android 14 / Pixel 7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: conversion_type
+    attributes:
+      label: Conversion / Feature Area
+      options:
+        - "Images to PDF (Local)"
+        - "Document to PDF (DOCX, PPTX, XLSX - Backend)"
+        - "Multi-PDF Merging"
+        - "Image Compression"
+        - "System Telemetry / Status Sheet"
+        - "In-App Updater / Download"
+        - "Google Auth / Account"
+        - "VirusTotal File Scan"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what went wrong.
+      placeholder: "When I try to convert a DOCX file..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps To Reproduce
+      description: How can we reproduce this issue?
+      value: |
+        1. Go to '...'
+        2. Tap on '...'
+        3. Select file '...'
+        4. See error '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs or Terminal Output
+      description: Paste any error messages, stack traces, or terminal logs here (if applicable).
+      render: shell
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Verification Check
+      options:
+        - label: I have verified this bug on the latest release of Konvert.
+          required: true
+        - label: I checked existing issues to make sure this is not a duplicate.
+          required: true

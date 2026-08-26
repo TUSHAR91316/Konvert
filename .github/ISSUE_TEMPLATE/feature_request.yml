@@ -1,0 +1,54 @@
+name: ✨ Feature Request
+description: Suggest a new feature, converter tool, or improvement for Konvert
+title: "[Feature]: "
+labels: ["enhancement", "feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please share your ideas to help make Konvert better. Check our [ROADMAP.md](https://github.com/TUSHAR91316/Konvert/blob/main/ROADMAP.md) to see if it's already planned.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      options:
+        - "PDF Tools & Manipulation (Split, Rotate, Watermark)"
+        - "Reverse Conversion (PDF to Word/Excel)"
+        - "OCR & Text Extraction"
+        - "Image Utilities & Compression"
+        - "Cross-Device Sync & Personal Docker Vault"
+        - "UI / UX & Desktop Experience"
+        - "Security & Privacy"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem is.
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: Any alternative solutions or features you've considered.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context or Mockups
+      description: Add any other context, screenshots, or mockup sketches about the feature request.
