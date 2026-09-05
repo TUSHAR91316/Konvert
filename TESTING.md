@@ -26,39 +26,46 @@ If any unit or widget tests fail, the push will be aborted.
 
 Even with local hooks, we maintain a robust CI/CD pipeline on GitHub to ensure all merged code is fully verified in a clean environment.
 
-**Workflow File:** `.github/workflows/flutter_ci.yml`
-
-This workflow triggers on **Push** and **Pull Request** to the `main` branch. It performs the following steps:
-1. Checks out the repository.
-2. Sets up Java 17 and the stable Flutter SDK.
-3. Installs dependencies (`flutter pub get`).
-4. Runs strict static analysis (`flutter analyze --fatal-infos`).
-5. Runs the full test suite (`flutter test`).
-6. Builds a Release APK for Android and uploads it as an artifact.
+**Workflow Files:**
+* `.github/workflows/flutter_ci.yml`: Triggers on Push & PR to `main`.
+  1. Checks out repository and sets up Java 17 + stable Flutter SDK.
+  2. Resolves dependencies (`flutter pub get`).
+  3. Executes strict static analysis (`flutter analyze --fatal-infos`).
+  4. Runs the automated test suite (`flutter test`).
+  5. Compiles production Release APK (`flutter build apk --release`).
+* `.github/workflows/backend_ci.yml`: Triggers on backend changes or manual dispatch.
+  1. Lints Python code with `flake8` for syntax and critical errors.
+  2. Builds the Docker container stack.
+  3. Verifies container health check endpoints.
 
 ## 3. Testing Suite
 
-The `test/` directory contains tests for all critical parts of the application.
+The `test/` directory contains 18 comprehensive tests covering all critical components.
 
 ### Unit Tests
-Located in `test/services/`. We use the `mocktail` package to mock external dependencies like `Dio` (HTTP) and `FlutterSecureStorage`.
-- `config_service_test.dart`: Verifies environment variables and backend URL storage.
-- `conversion_service_test.dart`: Verifies local image-to-PDF generation and remote API error handling.
-- `virus_total_service_test.dart`: Verifies API key storage and file size limits (32MB).
+Located in `test/services/`. We use `mocktail` to mock external network interfaces (`Dio`) and secure hardware keyrings (`FlutterSecureStorage`).
+- `config_service_test.dart`: Verifies environment variables, backend URL storage, and emulator loopback detection.
+- `conversion_service_test.dart`: Verifies on-device image-to-PDF generation and remote API error handling.
+- `virus_total_service_test.dart`: Verifies API key storage, 32MB payload limit enforcement, and hash lookup.
+- `update_service_test.dart`: Verifies semver parsing, build number handling, uppercase `V` tags, and update dialog triggers.
 
 ### Widget Tests
 Located in `test/widgets/`. 
-- `convert_screen_test.dart`: Verifies the UI renders correctly, including the Upload Zone, Document Setup, Output Quality toggles, and the Save Location selector.
+- `convert_screen_test.dart`: Verifies UI rendering across all responsive viewports, including Upload Zone, Document Setup, Quality Toggles, and Save Location selector.
 
-### Integration Tests
-Located in `test/integration/`.
-- `backend_connectivity_test.dart`: A smoke test that pings the local Docker backend. **Note:** This is intentionally skipped during GitHub Actions CI because the backend isn't spun up in the testing step.
+### Integration & Smoke Tests
+- `test/smoke_test.dart`: End-to-end smoke verification of app widget tree and theme provider.
+- `test/integration/backend_connectivity_test.dart`: Live smoke check against `http://localhost:8080/health`. Automatically skipped cleanly in CI if local backend is offline.
 
 ## How to Run Tests Manually
 ```bash
-# Run all tests
+# Run all tests (18 tests)
 flutter test
 
-# Run a specific test
+# Run with full code coverage report
+flutter test --coverage
+
+# Run a specific test file
+flutter test test/services/update_service_test.dart
 flutter test test/widgets/convert_screen_test.dart
 ```

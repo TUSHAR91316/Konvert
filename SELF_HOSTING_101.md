@@ -32,7 +32,7 @@ Choose **one** of the two methods below to spin up your backend:
 This method spins up both the backend API and the Ngrok tunnel inside Docker automatically. You do not need to install Ngrok on your local machine.
 
 1. **Download the Backend Files**:
-   Download the **`backend.zip`** from the [Konvert Releases Page](https://github.com/TUSHAR91316/Konvert-Website/releases) (or navigate to the `/backend` folder if you cloned the source code).
+   Download the **`backend.zip`** from the [Konvert Releases Page](https://github.com/TUSHAR91316/Konvert/releases/latest) (or navigate to the `/backend` folder if you cloned the source code).
 2. **Extract & Open**:
    Extract the zip file and open a Terminal / Command Prompt inside that directory.
 3. **Configure Environment variables**:
@@ -91,7 +91,12 @@ Now that your personal cloud is running securely, point the Konvert app to it.
 
 ## 🔍 Step 4: Verify Your Server Status & Telemetry
 
-You can check if your server and telemetry system are running properly by visiting the health details URL in your web browser:
+You can verify if your server and telemetry system are running properly using `curl` in your terminal:
+```bash
+curl -H "ngrok-skip-browser-warning: true" https://fancy-otter-123.ngrok-free.app/health/details
+```
+
+Or open the URL in your web browser:
 `https://fancy-otter-123.ngrok-free.app/health/details`
 
 It should return a live JSON response:
@@ -121,8 +126,11 @@ docker-compose up -d --build
 ```
 Alternatively, open `docker-compose.yml` and change the host port mapping (`9090:8080`).
 
+### Docker Desktop Windows Networking (`host.docker.internal`)
+Inside Docker Desktop on Windows, the Ngrok container forwards traffic to the API container via `host.docker.internal:8080`. The included `docker-compose.yml` pre-configures `extra_hosts: ["host.docker.internal:host-gateway"]` to guarantee zero DNS lookup errors.
+
 ### Ngrok Browser Warning Page
-When accessing the tunnel via a browser, Ngrok displays a warning page. **Don't worry:** the Konvert mobile client automatically sends a custom header `ngrok-skip-browser-warning` to bypass this warning and communicate with the API directly.
+When accessing the tunnel via a browser, Ngrok displays a free-tier warning page. **Don't worry:** the Konvert mobile client automatically passes the header `ngrok-skip-browser-warning: true` on every HTTP request to bypass this warning and communicate with the API directly.
 
 ### Checking Server Logs
 If document conversions are failing, inspect the logs to diagnose the issue:

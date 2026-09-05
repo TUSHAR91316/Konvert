@@ -186,15 +186,16 @@ Konvert enforces automated pre-commit and pre-push Git hooks:
 * **v2.0.0**: Official PC Launch (Windows/macOS) + Personal Docker Sync Vault.
 * **v1.8.0**: AI Document Intelligence Suite + Dedicated System Workspace Folder.
 
-> 📌 View the complete technical backlog and risk analysis in **[ROADMAP.md](ROADMAP.md)**.
+> 💡 Track upcoming feature milestones, report feedback, or share ideas in [GitHub Discussions](https://github.com/TUSHAR91316/Konvert/discussions) or inspect the public [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ---
 
 ## 🤝 Community & Contributing
 
 * 🐛 **Found a Bug?** Open a [Bug Report](https://github.com/TUSHAR91316/Konvert/issues/new?template=bug_report.yml).
-* 💡 **Have a Feature Idea?** Submit a [Feature Request](https://github.com/TUSHAR91316/Konvert/issues/new?template=feature_request.yml) or join the [Discussions](https://github.com/TUSHAR91316/Konvert/discussions).
+* 💡 **Have a Feature Idea?** Submit a [Feature Request](https://github.com/TUSHAR91316/Konvert/issues/new?template=feature_request.yml) or join [Discussions](https://github.com/TUSHAR91316/Konvert/discussions).
 * 🐳 **Self-Hosting Questions?** Check [SELF_HOSTING_101.md](SELF_HOSTING_101.md) or open a [Self-Hosting Ticket](https://github.com/TUSHAR91316/Konvert/issues/new?template=self_hosting_backend.yml).
+* 📖 **Technical Architecture?** Read the deep-dive system design in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 

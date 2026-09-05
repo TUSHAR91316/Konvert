@@ -40,12 +40,12 @@ class _CompressImageScreenState extends State<CompressImageScreen> {
   }
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.image,
     );
-    if (result != null) {
+    if (file != null && file.path != null) {
       setState(() {
-        _selectedFile = File(result.files.single.path!);
+        _selectedFile = File(file.path!);
         _resultFile = null;
         _statusMessage = null;
         _isSuccess = false;

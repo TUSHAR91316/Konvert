@@ -76,14 +76,13 @@ class _ConvertScreenState extends State<ConvertScreen> {
   }
 
   Future<void> _pickFiles() async {
-    FilePickerResult? result = await FilePicker.pickFiles(
-      allowMultiple: true,
+    final files = await FilePicker.pickFiles(
       type: widget.allowedExtensions != null ? FileType.custom : FileType.any,
       allowedExtensions: widget.allowedExtensions,
     );
-    if (result != null) {
+    if (files.isNotEmpty) {
       setState(() {
-        _selectedFiles = result.paths.map((p) => File(p!)).toList();
+        _selectedFiles = files.where((p) => p.path != null).map((p) => File(p.path!)).toList();
         _statusMessage = null;
         _isSuccess = false;
       });

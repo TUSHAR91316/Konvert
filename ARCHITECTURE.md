@@ -277,7 +277,10 @@ stateDiagram-v2
 | **Ingress Tunneling** | Ngrok Docker | `latest` | Secure HTTPS static domain reverse proxy |
 | **Authentication** | Google Sign-In | `7.2.0` | Android Credential Manager integration |
 | **Local Database** | SQLite (`sqflite`) | `2.4.3` | Device-local history and offline logs |
-| **Secure Keyring** | `flutter_secure_storage` | `9.2.4` | Encrypted theme, tokens, and backend URLs |
+| **Secure Keyring** | `flutter_secure_storage` | `11.0.0` | Hardware-backed encrypted theme, tokens, and backend URLs |
+| **File Picker** | `file_picker` | `12.1.1` | Native scoped-storage document and image picker |
+| **On-Device PDF** | `pdf` / `printing` | `3.13.0` / `5.15.0` | On-device vector PDF rendering and raster merge engine |
+| **App Installer** | `open_file` | `4.0.0` | In-app Android PackageInstaller invocation |
 
 ---
 
